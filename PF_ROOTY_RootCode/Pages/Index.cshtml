@@ -1,0 +1,168 @@
+﻿@page
+@using PF_ROOTY_RootCode.Pages
+@model IndexModel
+@{
+    ViewData["Title"] = "Inicio - Rooty";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    @* --------------------- BARRA DE NAVEGACION --------------------- *@
+    <header class="barra-navegacion">
+        <div class="icono-logo">🌱 Rooty</div>
+        <nav class="enlaces-navegacion">
+            <a href="#que-es-rooty">¿Qué es Rooty?</a>
+            <a href="#como-funciona">¿Cómo Funciona?</a>
+            <a href="#importancia">Importancia del Reciclaje</a>
+        </nav>
+        <div class="botones-header">
+            <a href="/Login" class="btn-login-nav">Iniciar Sesión</a>
+            <a href="/Registro" class="btn-registro-nav">Registrarse</a>
+        </div>
+    </header>
+
+    @* --------------------- INICIO --------------------- *@
+    <section class="seccion-inicio">
+        <h1 class="titulo-principal-rooty">ROOTY</h1>
+        <div class="slogan-rooty">Recicla PET, acumula puntos y transforma tu entorno</div>
+        <p class="descripcion-inicio-corta">
+            La plataforma que recompensa tu reciclaje de botellas de plástico.
+        </p>
+        <div class="acciones-hero">
+            <a href="/Registro" class="btn-principal-reciclar">¡Empieza a Reciclar!</a>
+        </div>
+    </section>
+
+    @* --------------------- QUE ES ROOTY Y CALCULO DE CO2 --------------------- *@
+    <section id="que-es-rooty" class="seccion-que-es">
+        <div class="contenedor-que-es">
+            <h2>¿Qué es Rooty?</h2>
+            <p>
+                <strong>Rooty</strong> Es un sistema de recompensas enfocado en el reciclaje de botellas de plástico. <strong>PET</strong>
+            </p>
+
+            <div class="tarjeta-calculo-co2">
+                <div class="icono-co2">🌱 💨</div>
+                <h3>¿Cómo Medimos tu Impacto Ambiental?</h3>
+                <p>
+                    Cada vez que entregas tus botellas PET, nuestro sistema calcula automáticamente el dióxido de carbono que evitas emitir al planeta.
+                </p>
+                <div class="equivalencia-co2-box">
+                    <div class="item-formula">
+                        <strong>1 kg de PET reciclado</strong>
+                    </div>
+                    <div class="flecha-formula">➜</div>
+                    <div class="item-formula destaque-co2">
+                        <strong>1.50 kg de CO₂ Evitado</strong>
+                    </div>
+                </div>
+              
+            </div>
+        </div>
+    </section>
+
+    @* --------------------- COMO FUNCIONA EL SISTEMA --------------------- *@
+    <section id="como-funciona" class="seccion-como-funciona">
+        <h2>¿Cómo Funciona Nuestro Sistema?</h2>
+        <p class="subtitulo-seccion">Aprende cómo usar Rooty en cuatro pasos sencillos:</p>
+
+        <div class="tarjetas-pasos-contenedor">
+            <div class="tarjeta-paso">
+                <div class="numero-paso">1</div>
+                <h4>Regístrate</h4>
+                <p>Crea tu cuenta en la plataforma de manera rápida y gratuita.</p>
+            </div>
+
+            <div class="tarjeta-paso">
+                <div class="numero-paso">2</div>
+                <h4>Localiza un Punto</h4>
+                <p>Ubica el centro de acopio de plástico PET más cercano a ti.</p>
+            </div>
+
+            <div class="tarjeta-paso">
+                <div class="numero-paso">3</div>
+                <h4>Escanea el  QR y  Registra tu Aporte</h4>
+                <p>Entrega tus botellas PET e ingresa los kilogramos recolectados en tu cuenta</p>
+            </div>
+
+            <div class="tarjeta-paso">
+                <div class="numero-paso">4</div>
+                <h4>Obtén Recompensas</h4>
+                <p>Acumula puntos por tu material reciclado y canjéalos por recompensas e insignias.</p>
+            </div>
+        </div>
+    </section>
+
+    @* --------------------- IMPORTANCIA DEL RECICLAJE --------------------- *@
+    <section id="importancia" class="seccion-importancia-galeria">
+        <div class="contenedor-dos-columnas">
+
+            <div class="columna-texto">
+                <h2>Impacto ambiental al reciclar PET?</h2>
+                <p class="introduccion-seccion">
+                    El PET es el plástico más común en botellas de bebidas. Al reciclarlo correctamente a través de Rooty, generas un cambio positivo inmediato en la huella ecológica de tu comunidad:
+                </p>
+
+                <div class="cuadros-impacto-grid">
+                    <div class="tarjeta-impacto">
+                        <div class="icono-impacto">🌱</div>
+                        <div class="contenido-impacto">
+                            <h4>Reducción de CO₂</h4>
+                            <p>Se evita la emisión de <strong>1.5 kg de CO₂</strong> por cada kilogramo de PET que se recicla.</p>
+                        </div>
+                    </div>
+
+                    <div class="tarjeta-impacto">
+                        <div class="icono-impacto">⚡</div>
+                        <div class="contenido-impacto">
+                            <h4>Ahorro Energético</h4>
+                            <p>Se requiere un <strong>75% menos de energía</strong> para procesar PET reciclado que para fabricar desde cero.</p>
+                        </div>
+                    </div>
+
+                    <div class="tarjeta-impacto">
+                        <div class="icono-impacto">🌊</div>
+                        <div class="contenido-impacto">
+                            <h4>Protección del Ecosistéma</h4>
+                            <p>Evita que las botellas terminen en lugares donde podrian afectar algun ecosistema natural.</p>
+                        </div>
+                    </div>
+
+                    <div class="tarjeta-impacto">
+                        <div class="icono-impacto">🔄</div>
+                        <div class="contenido-impacto">
+                            <h4>Economía Circular</h4>
+                            <p>Se reutiliza el PET reciclado para darle una segunda vida útil y sostenible.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="columna-imagen">
+                @* --------------------- IMAGEN  --------------------- *@
+                <div class="marco-imagen">
+                    <img src="images/imagen1.webp" alt="Reciclaje de botellas PET" class="imagen-estatica" />
+                    <div class="tarjeta-flotante-stat">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    @* --------------------- PIE DE PAGINA --------------------- *@
+    <footer class="pie-pagina">
+        <p><small>Rooty - Plataforma de Reciclaje PET</small></p>
+    </footer>
+
+</body>
+</html>

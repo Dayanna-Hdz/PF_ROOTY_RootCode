@@ -1,0 +1,55 @@
+﻿@page
+@using PF_ROOTY_RootCode.Pages
+@model MenuPrincipalModel
+@{
+    ViewData["Title"] = "Menú Principal - Rooty";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <!-- ------------------ ENLACE AL CSS EXTERNO ------------------ -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    <!-- ------------------ HEADER MENU ------------------ -->
+    <header class="header-landing">
+        <div class="logo-landing">🌱 Rooty - Menú Principal</div>
+        <div class="botones-header">
+            <a href="/" class="btn-login-nav">Cerrar Sesión</a>
+        </div>
+    </header>
+
+    <!-- ------------------ CUADRICULA DE OPCIONES ------------------ -->
+    <main class="contenedor-menu">
+        <h2>Bienvenido al Sistema</h2>
+        <p>Selecciona la opción a la que deseas ingresar:</p>
+
+        <div class="cuadricula-secciones">
+            <a href="/Perfil" class="tarjeta-opcion">
+                <h3>👤 Mi Perfil</h3>
+            </a>
+            <a href="/AcreditarPuntos" class="tarjeta-opcion">
+                <h3>♻️ Acreditar Puntos</h3>
+            </a>
+            <a href="/Recompensas" class="tarjeta-opcion">
+                <h3>🎁 Recompensas</h3>
+            </a>
+            <a href="/MapaPuntos" class="tarjeta-opcion">
+                <h3>📍 Mapa de Puntos</h3>
+            </a>
+        </div>
+    </main>
+
+    <!-- ------------------ FOOTER ------------------ -->
+    <footer class="footer-global">
+        <p>Rooty - Plataforma de Reciclaje</p>
+    </footer>
+
+</body>
+</html>

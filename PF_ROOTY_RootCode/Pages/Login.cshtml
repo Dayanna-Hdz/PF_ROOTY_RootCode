@@ -1,0 +1,51 @@
+﻿@page
+@using PF_ROOTY_RootCode.Pages
+@model LoginModel
+@{
+    ViewData["Title"] = "Iniciar Sesión - Rooty";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    <!-- ------------------ CONTENEDOR CENTRADO ------------------ -->
+    <div class="contenedor-centrado">
+        <div class="tarjeta-formulario">
+            <h2>Iniciar Sesión</h2>
+
+            @if (!string.IsNullOrEmpty(Model.Mensaje))
+            {
+                <p style="color: red;">@Model.Mensaje</p>
+            }
+
+            <!-- ------------------ FORMULARIO DE ACCESO ------------------ -->
+            <form method="post">
+                <div class="grupo-campo">
+                    <label>Correo Electrónico</label>
+                    <input type="email" asp-for="Correo" placeholder="correo@ejemplo.com" required />
+                </div>
+
+                <div class="grupo-campo">
+                    <label>Contraseña</label>
+                    <input type="password" asp-for="Password" placeholder="••••••••" required />
+                </div>
+
+                <button type="submit" class="btn-accion">Ingresar</button>
+            </form>
+
+            <br />
+            <p>¿No tienes cuenta? <a href="/Registro">Regístrate aquí</a></p>
+            <p><a href="/">Volver al inicio</a></p>
+        </div>
+    </div>
+
+</body>
+</html>

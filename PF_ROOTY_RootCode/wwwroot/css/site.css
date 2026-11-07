@@ -1,0 +1,536 @@
+/* ---------------------
+VARIABLES GLOBALES
+--------------------- */
+:root {
+    --color-primario: #2e7d32;
+    --color-primario-oscuro: #1b5e20;
+    --color-fondo: #f4f6f8;
+    --color-tarjeta: #ffffff;
+    --color-texto: #333333;
+    --color-borde: #e0e0e0;
+}
+
+/* ---------------------
+ESTILOS GENERALES
+--------------------- */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------------------
+PAGINA PRINCIPAL (INDEX)
+--------------------- */
+.barra-navegacion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--color-borde);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.icono-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-primario);
+}
+
+.enlaces-navegacion a {
+    margin: 0 1rem;
+    text-decoration: none;
+    color: #555555;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+    .enlaces-navegacion a:hover {
+        color: var(--color-primario);
+    }
+
+.botones-header a {
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-left: 0.5rem;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.btn-login-nav {
+    color: var(--color-primario);
+    border: 1px solid var(--color-primario);
+    transition: background-color 0.2s ease;
+}
+
+    .btn-login-nav:hover {
+        background-color: #e8f5e9;
+    }
+
+.btn-registro-nav {
+    background-color: var(--color-primario);
+    color: white !important;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-registro-nav:hover {
+        background-color: var(--color-primario-oscuro);
+    }
+
+.seccion-inicio {
+    text-align: center;
+    padding: 5rem 1.5rem 4rem 1.5rem;
+    background-color: #f4fbf7;
+}
+
+.titulo-principal-rooty {
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--color-primario-oscuro);
+    margin-bottom: 0.2rem;
+    letter-spacing: 3px;
+}
+
+.slogan-rooty {
+    font-size: 1.3rem;
+    color: #388e3c;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.descripcion-inicio-corta {
+    font-size: 1.1rem;
+    color: #666666;
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+}
+
+.acciones-hero {
+    margin-top: 1.5rem;
+}
+
+.btn-principal-reciclar {
+    text-decoration: none;
+    padding: 0.9rem 2.2rem;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    background-color: var(--color-primario);
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    display: inline-block;
+}
+
+    .btn-principal-reciclar:hover {
+        transform: translateY(-3px);
+        background-color: var(--color-primario-oscuro);
+    }
+
+/* ---------------------
+SECCION QUE ES ROOTY Y TARJETA CO2
+--------------------- */
+.seccion-que-es {
+    padding: 4rem 1.5rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.contenedor-que-es {
+    max-width: 850px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+    .contenedor-que-es h2 {
+        color: var(--color-primario);
+        font-size: 2.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .contenedor-que-es > p {
+        font-size: 1.15rem;
+        color: #555555;
+        line-height: 1.7;
+        margin-bottom: 2.5rem;
+    }
+
+.tarjeta-calculo-co2 {
+    background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+    border: 2px dashed var(--color-primario);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.08);
+}
+
+.icono-co2 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.tarjeta-calculo-co2 h3 {
+    color: var(--color-primario-oscuro);
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
+}
+
+.tarjeta-calculo-co2 p {
+    color: #444444;
+    font-size: 1rem;
+    max-width: 650px;
+    margin: 0 auto 1.5rem auto;
+    line-height: 1.5;
+}
+
+.equivalencia-co2-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.item-formula {
+    background: #ffffff;
+    padding: 0.8rem 1.4rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+    font-size: 1.05rem;
+    color: #333333;
+}
+
+    .item-formula.destaque-co2 {
+        background: var(--color-primario);
+        color: white;
+        border-color: var(--color-primario-oscuro);
+    }
+
+.flecha-formula {
+    font-size: 1.4rem;
+    color: var(--color-primario);
+    font-weight: bold;
+}
+
+.tarjeta-calculo-co2 small {
+    color: #777777;
+    font-size: 0.85rem;
+    display: block;
+}
+
+/* ---------------------
+SECCION COMO FUNCIONA
+--------------------- */
+.seccion-como-funciona {
+    padding: 3.5rem 1.5rem;
+    background-color: #f4f6f8;
+    text-align: center;
+}
+
+    .seccion-como-funciona h2 {
+        color: var(--color-primario);
+        font-size: 2rem;
+    }
+
+.subtitulo-seccion {
+    color: #666666;
+}
+
+.tarjetas-pasos-contenedor {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.tarjeta-paso {
+    background: #ffffff;
+    border: 2px solid #e8f5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 230px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+    .tarjeta-paso:hover {
+        transform: translateY(-5px);
+        border-color: var(--color-primario);
+    }
+
+    .tarjeta-paso h4 {
+        color: var(--color-primario-oscuro);
+        margin-top: 0.5rem;
+    }
+
+    .tarjeta-paso p {
+        font-size: 0.95rem;
+        color: #555555;
+    }
+
+.numero-paso {
+    background-color: var(--color-primario);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin: 0 auto 1rem auto;
+}
+
+/* ---------------------
+IMPORTANCIA DEL RECICLAJE (MEJORADO)
+--------------------- */
+.seccion-importancia-galeria {
+    padding: 4rem 1.5rem;
+    background-color: #ffffff;
+}
+
+.contenedor-dos-columnas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+.columna-texto {
+    flex: 1.2;
+    min-width: 320px;
+}
+
+.etiqueta-destacada {
+    color: var(--color-primario);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.columna-texto h2 {
+    color: var(--color-primario-oscuro);
+    font-size: 2rem;
+    margin-top: 0.3rem;
+    margin-bottom: 1rem;
+}
+
+.introduccion-seccion {
+    color: #555555;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+}
+
+/* Grid de tarjetas de impacto */
+.cuadros-impacto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+    margin-top: 1.5rem;
+}
+
+.tarjeta-impacto {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    background-color: #ffffff;
+    padding: 1.1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid var(--color-primario);
+    border-top: 1px solid var(--color-borde);
+    border-right: 1px solid var(--color-borde);
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.icono-impacto {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.contenido-impacto h4 {
+    margin: 0 0 0.3rem 0;
+    font-size: 1rem;
+    color: var(--color-primario-oscuro);
+}
+
+.contenido-impacto p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #666666;
+    line-height: 1.45;
+}
+
+/* Columna de imagen y tarjeta flotante */
+.columna-imagen {
+    flex: 0.9;
+    min-width: 300px;
+    max-width: 480px;
+}
+
+.marco-imagen {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.imagen-estatica {
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    object-fit: cover;
+    display: block;
+}
+
+.tarjeta-flotante-stat {
+    position: absolute;
+    bottom: -18px;
+    left: 20px;
+    background: #ffffff;
+    padding: 0.8rem 1.4rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid #e8f5e9;
+}
+
+    .tarjeta-flotante-stat strong {
+        color: var(--color-primario);
+        font-size: 1.4rem;
+        line-height: 1.1;
+    }
+
+    .tarjeta-flotante-stat span {
+        font-size: 0.78rem;
+        color: #666666;
+        font-weight: 500;
+    }
+
+/* Pie de página */
+.pie-pagina {
+    text-align: center;
+    padding: 1.5rem;
+    background-color: var(--color-primario-oscuro);
+    color: white;
+}
+
+/* ---------------------
+FORMULARIOS (LOGIN Y REGISTRO)
+--------------------- */
+.contenedor-centrado {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+}
+
+.tarjeta-formulario {
+    background: var(--color-tarjeta);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+}
+
+    .tarjeta-formulario h2 {
+        color: var(--color-primario);
+        margin-top: 0;
+    }
+
+.grupo-campo {
+    text-align: left;
+    margin-bottom: 1.2rem;
+}
+
+    .grupo-campo label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+        display: block;
+    }
+
+    .grupo-campo input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--color-borde);
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
+    }
+
+        .grupo-campo input:focus {
+            outline: none;
+            border-color: var(--color-primario);
+        }
+
+.btn-accion {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--color-primario);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-accion:hover {
+        background-color: var(--color-primario-oscuro);
+    }
+
+/* ---------------------
+MENU PRINCIPAL
+--------------------- */
+.contenedor-menu {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.cuadricula-secciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.tarjeta-opcion {
+    background: var(--color-tarjeta);
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+    color: var(--color-texto);
+    font-weight: bold;
+    border: 1px solid var(--color-borde);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+    .tarjeta-opcion:hover {
+        transform: translateY(-5px);
+        border-color: var(--color-primario);
+    }
