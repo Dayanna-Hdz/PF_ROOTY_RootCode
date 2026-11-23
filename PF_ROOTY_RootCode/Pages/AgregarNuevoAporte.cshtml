@@ -11,9 +11,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <!-- Estilos de Leaflet  -->
+    <!-- Estilos de Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body class="app-body">
@@ -213,6 +216,13 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+            // Bloquea el botón Atrás del navegador tras cerrar sesión (BFCache)
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            });
+
             const puntosData = @Html.Raw(Model.PuntosJson);
             let puntoSeleccionadoObj = null;
 
@@ -239,14 +249,14 @@
                     const marker = L.marker([punto.Latitud, punto.Longitud], { icon: iconoRooty }).addTo(mapa);
 
                     const popupHtml = `
-                                            <div class="popup-rooty">
-                                                <strong>${punto.NombrePunto}</strong>
-                                                <p>${punto.UbicacionDetalle}</p>
-                                                <button type="button" class="btn-popup-aporte" onclick="seleccionarPunto(${idx})">
-                                                    Elegir este centro ✓
-                                                </button>
-                                            </div>
-                                        `;
+                                <div class="popup-rooty">
+                                    <strong>${punto.NombrePunto}</strong>
+                                    <p>${punto.UbicacionDetalle}</p>
+                                    <button type="button" class="btn-popup-aporte" onclick="seleccionarPunto(${idx})">
+                                        Elegir este centro ✓
+                                    </button>
+                                </div>
+                            `;
 
                     marker.bindPopup(popupHtml);
                     marker.on('click', () => seleccionarPunto(idx, false));
@@ -273,9 +283,9 @@
                     }
 
                     document.getElementById('textoPuntoElegido').innerHTML = `
-                                            <strong>Seleccionado: ${punto.NombrePunto}</strong>
-                                            <span>${punto.UbicacionDetalle}</span>
-                                        `;
+                                <strong>Seleccionado: ${punto.NombrePunto}</strong>
+                                <span>${punto.UbicacionDetalle}</span>
+                            `;
 
                     const btn = document.getElementById('btnIrPaso2');
                     btn.disabled = false;

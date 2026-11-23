@@ -10,6 +10,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
@@ -109,12 +112,7 @@
                     @* Costo en puntos (arriba) *@
                     <div class="recompensa-costo">@r.CostoPuntos pts</div>
 
-                    @* --------------------- IMAGEN DE LA TARJETA ---------------------
-                       Coloca tus imágenes en: wwwroot/images/recompensas/
-                       El nombre del archivo se toma de la columna imagen_archivo de la base de datos:
-                       netflix.png, spotify.png, disney.png, apple.png, ubereats.png,
-                       googleplay.png, amazon.png, starbucks.png, mercadolibre.png
-                       Si la imagen no existe, se muestra la inicial de la marca automáticamente. *@
+                    @* --------------------- IMAGEN DE LA TARJETA -------------------- *@
                     <div class="recompensa-imagen-marco">
                         <img src="~/images/recompensas/@r.ImagenArchivo" alt="@r.Titulo" class="recompensa-imagen"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
@@ -217,6 +215,13 @@
 
     @* --------------------- LOGICA DE CANJE Y VENTANAS --------------------- *@
     <script>
+            // Bloquea el botón Atrás del navegador tras cerrar sesión (BFCache)
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            });
+
             // Saldo actual tomado del servidor y recompensa elegida en la ventana de confirmación
             const saldoActual = @Model.PuntosDisponibles;
             let recompensaElegidaId = null;

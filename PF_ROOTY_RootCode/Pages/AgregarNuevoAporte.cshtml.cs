@@ -51,6 +51,11 @@ namespace PF_ROOTY_RootCode.Pages
         // ------------------ CARGA DE LA PAGINA ------------------
         public IActionResult OnGet()
         {
+            // Evita que el navegador guarde caché (bloquea volver con la flecha Atrás tras Logout)
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
+
             int? usuarioId = HttpContext.Session.GetInt32("UsuarioId");
             string? nombreCompleto = HttpContext.Session.GetString("UsuarioNombre");
 
@@ -68,6 +73,11 @@ namespace PF_ROOTY_RootCode.Pages
         // ------------------ REGISTRO DEL APORTE ------------------
         public IActionResult OnPost()
         {
+            // Evita que el navegador guarde caché en la respuesta POST
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
+
             int? usuarioId = HttpContext.Session.GetInt32("UsuarioId");
             string? nombreCompleto = HttpContext.Session.GetString("UsuarioNombre");
 
