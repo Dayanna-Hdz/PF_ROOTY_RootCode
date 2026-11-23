@@ -13,6 +13,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Estilos de Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    @* --------------------- ESTILOS DE LA SECCION DE PUNTOS DE ACOPIO --------------------- *@
+    <style>
+            .seccion-puntos-acopio {
+                padding: 4rem 1.5rem;
+                background-color: #ffffff;
+            }
+
+            .contenedor-puntos-acopio {
+                max-width: 1150px;
+                margin: 0 auto;
+            }
+
+            .encabezado-puntos-acopio {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+                .encabezado-puntos-acopio h2 {
+                    color: var(--color-primario-oscuro);
+                    font-size: 2rem;
+                    margin: 0 0 0.5rem 0;
+                }
+
+                .encabezado-puntos-acopio p {
+                    color: #666666;
+                    font-size: 1.05rem;
+                    margin: 0;
+                }
+
+            .layout-puntos-publico {
+                display: grid;
+                grid-template-columns: 370px 1fr;
+                gap: 1.5rem;
+                background: var(--color-tarjeta);
+                padding: 1.5rem;
+                border-radius: 16px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+                border: 1px solid #e0e6e3;
+            }
+
+            @@media (max-width: 900px) {
+                .layout-puntos-publico {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .mapa-publico-marco {
+                border-radius: 12px;
+                overflow: hidden;
+                border: 1px solid #d5e0da;
+                height: 520px;
+            }
+
+            #mapaPublicoRooty {
+                width: 100%;
+                height: 100%;
+                z-index: 1;
+            }
+
+            .aviso-sin-puntos {
+                text-align: center;
+                padding: 2rem 1rem;
+                color: #78909c;
+            }
+    </style>
 </head>
 <body>
 
@@ -22,7 +90,7 @@
         <nav class="enlaces-navegacion">
             <a href="#que-es-rooty">¿Qué es Rooty?</a>
             <a href="#como-funciona">¿Cómo Funciona?</a>
-            <a href="#importancia">Importancia del Reciclaje</a>
+            <a href="#puntos-acopio">Puntos de Acopio</a>
         </nav>
         <div class="botones-header">
             <a href="/Login" class="btn-login-nav">Iniciar Sesión</a>
@@ -65,7 +133,7 @@
                         <strong>1.50 kg de CO₂ Evitado</strong>
                     </div>
                 </div>
-              
+
             </div>
         </div>
     </section>
@@ -102,59 +170,53 @@
         </div>
     </section>
 
-    @* --------------------- IMPORTANCIA DEL RECICLAJE --------------------- *@
-    <section id="importancia" class="seccion-importancia-galeria">
-        <div class="contenedor-dos-columnas">
+    @* --------------------- PUNTOS DE ACOPIO (LISTA + MAPA) --------------------- *@
+    <section id="puntos-acopio" class="seccion-puntos-acopio">
+        <div class="contenedor-puntos-acopio">
 
-            <div class="columna-texto">
-                <h2>Impacto ambiental al reciclar PET?</h2>
-                <p class="introduccion-seccion">
-                    El PET es el plástico más común en botellas de bebidas. Al reciclarlo correctamente a través de Rooty, generas un cambio positivo inmediato en la huella ecológica de tu comunidad:
-                </p>
-
-                <div class="cuadros-impacto-grid">
-                    <div class="tarjeta-impacto">
-                        <div class="icono-impacto">🌱</div>
-                        <div class="contenido-impacto">
-                            <h4>Reducción de CO₂</h4>
-                            <p>Se evita la emisión de <strong>1.5 kg de CO₂</strong> por cada kilogramo de PET que se recicla.</p>
-                        </div>
-                    </div>
-
-                    <div class="tarjeta-impacto">
-                        <div class="icono-impacto">⚡</div>
-                        <div class="contenido-impacto">
-                            <h4>Ahorro Energético</h4>
-                            <p>Se requiere un <strong>75% menos de energía</strong> para procesar PET reciclado que para fabricar desde cero.</p>
-                        </div>
-                    </div>
-
-                    <div class="tarjeta-impacto">
-                        <div class="icono-impacto">🌊</div>
-                        <div class="contenido-impacto">
-                            <h4>Protección del Ecosistéma</h4>
-                            <p>Evita que las botellas terminen en lugares donde podrian afectar algun ecosistema natural.</p>
-                        </div>
-                    </div>
-
-                    <div class="tarjeta-impacto">
-                        <div class="icono-impacto">🔄</div>
-                        <div class="contenido-impacto">
-                            <h4>Economía Circular</h4>
-                            <p>Se reutiliza el PET reciclado para darle una segunda vida útil y sostenible.</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="encabezado-puntos-acopio">
+                <h2>Conoce nuestros puntos de acopio</h2>
+                <p>Encuentra el centro más cercano a ti y entrega tus botellas PET.</p>
             </div>
 
-            <div class="columna-imagen">
-                @* --------------------- IMAGEN  --------------------- *@
-                <div class="marco-imagen">
-                    <img src="images/imagen1.webp" alt="Reciclaje de botellas PET" class="imagen-estatica" />
-                    <div class="tarjeta-flotante-stat">
+            @if (Model.ListaPuntos.Count == 0)
+            {
+                <div class="aviso-sin-puntos">Por el momento no hay puntos de acopio disponibles.</div>
+            }
+            else
+            {
+                <div class="layout-puntos-publico">
+
+                    @* Lista de centros (clic para ubicarlos en el mapa) *@
+                    <div class="lista-puntos-panel">
+                        <div class="lista-puntos-header">
+                            <h3>Centros de Acopio (@Model.ListaPuntos.Count)</h3>
+                            <span>Clic para ver en el mapa</span>
+                        </div>
+
+                        <div class="lista-puntos-scroll">
+                            @for (int i = 0; i < Model.ListaPuntos.Count; i++)
+                            {
+                                var p = Model.ListaPuntos[i];
+                                <div class="tarjeta-punto-item" id="card-punto-@i" onclick="verPuntoEnMapa(@i)">
+                                    <div class="punto-badge-num">@(i + 1)</div>
+                                    <div class="punto-detalle-texto">
+                                        <h4>@p.NombrePunto</h4>
+                                        <p>📍 @p.UbicacionDetalle</p>
+                                        <span class="estado-punto-abierto">● Recepción activa de Botellas PET</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     </div>
+
+                    @* Mapa *@
+                    <div class="mapa-publico-marco">
+                        <div id="mapaPublicoRooty"></div>
+                    </div>
+
                 </div>
-            </div>
+            }
 
         </div>
     </section>
@@ -163,6 +225,69 @@
     <footer class="pie-pagina">
         <p><small>Rooty - Plataforma de Reciclaje PET</small></p>
     </footer>
+
+    @* --------------------- LOGICA DEL MAPA PUBLICO --------------------- *@
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+            const puntosData = @Html.Raw(Model.PuntosJson);
+            const mapaEl = document.getElementById('mapaPublicoRooty');
+            const marcadores = [];
+            let mapa = null;
+
+            if (mapaEl && puntosData.length > 0) {
+                // Centro inicial del mapa (Monterrey, N.L.). Cambia las coordenadas si quieres otro punto de partida.
+                mapa = L.map('mapaPublicoRooty').setView([25.6950, -100.3100], 11);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap | Rooty'
+                }).addTo(mapa);
+
+                const iconoRooty = L.divIcon({
+                    className: 'custom-pin-rooty',
+                    html: `<div class="pin-verde">🌱</div>`,
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 36],
+                    popupAnchor: [0, -34]
+                });
+
+                puntosData.forEach((punto, idx) => {
+                    const marker = L.marker([punto.Latitud, punto.Longitud], { icon: iconoRooty }).addTo(mapa);
+
+                    marker.bindPopup(`
+                                <div class="popup-rooty">
+                                    <strong>${punto.NombrePunto}</strong>
+                                    <p>${punto.UbicacionDetalle}</p>
+                                </div>
+                            `);
+
+                    // Al tocar un marcador se resalta su tarjeta en la lista
+                    marker.on('click', () => resaltarTarjeta(idx));
+                    marcadores.push(marker);
+                });
+            }
+
+            // --------------------- RESALTAR TARJETA EN LA LISTA ---------------------
+            function resaltarTarjeta(indice) {
+                document.querySelectorAll('.tarjeta-punto-item').forEach(el => el.classList.remove('seleccionado'));
+                const tarjeta = document.getElementById('card-punto-' + indice);
+                if (tarjeta) {
+                    tarjeta.classList.add('seleccionado');
+                    tarjeta.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            // --------------------- UBICAR UN CENTRO EN EL MAPA DESDE LA LISTA ---------------------
+            function verPuntoEnMapa(indice) {
+                const punto = puntosData[indice];
+                const marker = marcadores[indice];
+                if (!mapa || !punto || !marker) return;
+
+                mapa.flyTo([punto.Latitud, punto.Longitud], 15, { duration: 1.0 });
+                marker.openPopup();
+                resaltarTarjeta(indice);
+            }
+    </script>
 
 </body>
 </html>

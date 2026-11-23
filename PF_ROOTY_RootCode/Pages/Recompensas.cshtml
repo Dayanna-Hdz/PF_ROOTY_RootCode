@@ -1,38 +1,317 @@
 ﻿@page
-@using PF_ROOTY_RootCode.Pages
+@model PF_ROOTY_RootCode.Pages.RecompensasModel
 @{
-    ViewData["Title"] = "Recompensas - Rooty";
+    ViewData["Title"] = "Canjear Recompensas - Rooty";
     Layout = null;
 }
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- ------------------ CONFIGURACION Y ESTILOS ------------------ -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body>
 
-    <!-- ------------------ CABECERA / NAVEGACION ------------------ -->
-    <header class="header-landing">
-        <div class="logo-landing">🌱 Rooty</div>
-        <div class="botones-header">
-            <a href="/MenuPrincipal" class="btn-login-nav">← Volver al Menú</a>
+    @* --------------------- ESTILOS EXTRA DE LAS VENTANAS DE CONFIRMACION Y AVISO --------------------- *@
+    <style>
+            .modal-botones {
+                display: flex;
+                gap: 0.8rem;
+            }
+
+                .modal-botones .btn-accion,
+                .modal-botones .btn-secundario-outline {
+                    flex: 1;
+                    width: auto;
+                    cursor: pointer;
+                    font-size: 0.95rem;
+                    background-color: #ffffff;
+                    box-sizing: border-box;
+                }
+
+                .modal-botones .btn-accion {
+                    background-color: var(--color-primario);
+                }
+
+            .modal-resumen-canje {
+                background-color: #f1f8f4;
+                border: 1px solid #c8e6c9;
+                border-radius: 12px;
+                padding: 0.9rem 1rem;
+                margin-bottom: 1.4rem;
+                text-align: left;
+            }
+
+            .modal-fila-resumen {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.9rem;
+                color: #607d8b;
+                padding: 0.3rem 0;
+            }
+
+                .modal-fila-resumen strong {
+                    color: var(--color-primario-oscuro);
+                }
+
+                .modal-fila-resumen.total {
+                    border-top: 1px dashed #c8e6c9;
+                    margin-top: 0.3rem;
+                    padding-top: 0.6rem;
+                }
+    </style>
+</head>
+<body class="app-body">
+
+    @* --------------------- BARRA DE NAVEGACION INTERNA --------------------- *@
+    <header class="navbar-interna">
+        <div class="logo-app">🌱 Rooty</div>
+        <nav class="nav-links-interna">
+            <a href="/MenuPrincipal">Menú Principal</a>
+            <a href="/AgregarNuevoAporte">Agregar Aporte</a>
+            <a href="/Recompensas" class="activo">Canjear Recompensas</a>
+            <a href="/Perfil">Mi Perfil</a>
+        </nav>
+        <div class="usuario-saludo">
+            <a href="/Logout" class="btn-cerrar-sesion">Cerrar Sesión</a>
         </div>
     </header>
 
-    <!-- ------------------ CONTENIDO PRINCIPAL ------------------ -->
-    <main class="contenedor-hero">
-        <h1 class="titulo-hero">Sección Recompensas</h1>
+    @* --------------------- CONTENIDO PRINCIPAL --------------------- *@
+    <main class="contenedor-app">
+
+        @* --------------------- ENCABEZADO Y SALDO DE PUNTOS --------------------- *@
+        <div class="encabezado-recompensas">
+            <div class="encabezado-seccion">
+                <h1>Canjear Recompensas</h1>
+                <p>Cambia tus puntos por tarjetas digitales. Al canjear recibirás un código QR y un código de canje.</p>
+            </div>
+            <div class="saldo-puntos-box">
+                <span>Tus puntos disponibles</span>
+                <strong id="saldoPuntos">@Model.PuntosDisponibles pts</strong>
+            </div>
+        </div>
+
+        @* Token de seguridad para el canje (no borrar) *@
+        <div class="oculto">@Html.AntiForgeryToken()</div>
+
+        @* --------------------- CUADRICULA 3 x 3 DE TARJETAS --------------------- *@
+        <section class="grid-recompensas">
+            @foreach (var r in Model.ListaRecompensas)
+            {
+                bool agotada = r.Stock <= 0;
+                bool sinPuntos = r.CostoPuntos > Model.PuntosDisponibles;
+
+                <article class="tarjeta-recompensa @(agotada ? "agotada" : "")" style="--color-marca: @r.ColorMarca;">
+
+                    @* Costo en puntos (arriba) *@
+                    <div class="recompensa-costo">@r.CostoPuntos pts</div>
+
+                    @* --------------------- IMAGEN DE LA TARJETA ---------------------
+                       Coloca tus imágenes en: wwwroot/images/recompensas/
+                       El nombre del archivo se toma de la columna imagen_archivo de la base de datos:
+                       netflix.png, spotify.png, disney.png, apple.png, ubereats.png,
+                       googleplay.png, amazon.png, starbucks.png, mercadolibre.png
+                       Si la imagen no existe, se muestra la inicial de la marca automáticamente. *@
+                    <div class="recompensa-imagen-marco">
+                        <img src="~/images/recompensas/@r.ImagenArchivo" alt="@r.Titulo" class="recompensa-imagen"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="recompensa-inicial" style="display:none;">@r.Inicial</div>
+                    </div>
+
+                    @* Titulo y descripcion *@
+                    <div class="recompensa-texto">
+                        <h4>@r.Titulo</h4>
+                        <p>@r.Descripcion</p>
+                    </div>
+
+                    @* Boton de canje (abajo) *@
+                    @if (agotada)
+                    {
+                        <button type="button" class="btn-canjear" disabled>Agotado</button>
+                    }
+                    else if (sinPuntos)
+                    {
+                        <button type="button" class="btn-canjear" disabled>Puntos insuficientes</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn-canjear"
+                                data-id="@r.RecompensaId"
+                                data-titulo="@r.Titulo"
+                                data-costo="@r.CostoPuntos"
+                                onclick="abrirConfirmacion(this)">
+                            Canjear ahora
+                        </button>
+                    }
+                </article>
+            }
+        </section>
+
     </main>
 
-    <!-- ------------------ PIE DE PAGINA ------------------ -->
-    <footer class="footer-global">
-        <p>Rooty - Plataforma de Reciclaje</p>
-    </footer>
+    @* --------------------- VENTANA FLOTANTE: CONFIRMAR CANJE --------------------- *@
+    <div class="modal-fondo oculto" id="modalConfirmar">
+        <div class="modal-canje">
+            <div class="modal-icono">🎁</div>
+            <h2>¿Canjear esta recompensa?</h2>
+            <p class="modal-subtitulo" id="confirmarTitulo">-</p>
+
+            <div class="modal-resumen-canje">
+                <div class="modal-fila-resumen">
+                    <span>Tu saldo actual</span>
+                    <strong id="confirmarSaldo">0 pts</strong>
+                </div>
+                <div class="modal-fila-resumen">
+                    <span>Costo del canje</span>
+                    <strong id="confirmarCosto">- 0 pts</strong>
+                </div>
+                <div class="modal-fila-resumen total">
+                    <span>Te quedarán</span>
+                    <strong id="confirmarRestante">0 pts</strong>
+                </div>
+            </div>
+
+            <div class="modal-botones">
+                <button type="button" class="btn-secundario-outline" onclick="cerrarConfirmacion()">Cancelar</button>
+                <button type="button" class="btn-accion" id="btnConfirmarCanje" onclick="confirmarCanje()">Sí, canjear</button>
+            </div>
+        </div>
+    </div>
+
+    @* --------------------- VENTANA FLOTANTE: AVISO DE ERROR --------------------- *@
+    <div class="modal-fondo oculto" id="modalAviso">
+        <div class="modal-canje">
+            <div class="modal-icono">⚠️</div>
+            <h2>No se pudo canjear</h2>
+            <p class="modal-subtitulo" id="avisoMensaje">-</p>
+            <button type="button" class="btn-accion" onclick="recargarPagina()">Entendido</button>
+        </div>
+    </div>
+
+    @* --------------------- VENTANA FLOTANTE DEL CODIGO QR --------------------- *@
+    <div class="modal-fondo oculto" id="modalCanje">
+        <div class="modal-canje">
+            <div class="modal-icono">🎉</div>
+            <h2 id="modalTitulo">¡Canje exitoso!</h2>
+            <p class="modal-subtitulo">Escanea el código QR para ir al sitio de la tarjeta.</p>
+
+            <div class="modal-qr-marco">
+                <div id="contenedorQr"></div>
+            </div>
+
+            <span class="modal-etiqueta-codigo">Tu código de canje</span>
+            <div class="modal-codigo" id="modalCodigo">-</div>
+
+            <button type="button" class="btn-accion" onclick="cerrarModalCanje()">Listo</button>
+        </div>
+    </div>
+
+    @* --------------------- FOOTER --------------------- *@
+    <footer class="footer-minimalista"></footer>
+
+    @* --------------------- LIBRERIA DE CODIGO QR --------------------- *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    @* --------------------- LOGICA DE CANJE Y VENTANAS --------------------- *@
+    <script>
+            // Saldo actual tomado del servidor y recompensa elegida en la ventana de confirmación
+            const saldoActual = @Model.PuntosDisponibles;
+            let recompensaElegidaId = null;
+            let recompensaElegidaCosto = 0;
+
+            // --------------------- ABRIR VENTANA DE CONFIRMACION ---------------------
+            function abrirConfirmacion(boton) {
+                recompensaElegidaId = boton.getAttribute('data-id');
+                recompensaElegidaCosto = parseInt(boton.getAttribute('data-costo'));
+                const titulo = boton.getAttribute('data-titulo');
+
+                document.getElementById('confirmarTitulo').textContent = titulo;
+                document.getElementById('confirmarSaldo').textContent = saldoActual + ' pts';
+                document.getElementById('confirmarCosto').textContent = '- ' + recompensaElegidaCosto + ' pts';
+                document.getElementById('confirmarRestante').textContent = (saldoActual - recompensaElegidaCosto) + ' pts';
+
+                const btn = document.getElementById('btnConfirmarCanje');
+                btn.disabled = false;
+                btn.textContent = 'Sí, canjear';
+
+                document.getElementById('modalConfirmar').classList.remove('oculto');
+            }
+
+            function cerrarConfirmacion() {
+                document.getElementById('modalConfirmar').classList.add('oculto');
+            }
+
+            // --------------------- ENVIAR EL CANJE AL SERVIDOR ---------------------
+            async function confirmarCanje() {
+                const btn = document.getElementById('btnConfirmarCanje');
+                btn.disabled = true;
+                btn.textContent = 'Procesando...';
+
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const datos = new URLSearchParams();
+                datos.append('recompensaId', recompensaElegidaId);
+                datos.append('__RequestVerificationToken', token);
+
+                try {
+                    const respuesta = await fetch('/Recompensas?handler=Canjear', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: datos.toString()
+                    });
+                    const resultado = await respuesta.json();
+
+                    cerrarConfirmacion();
+
+                    if (!resultado.ok) {
+                        mostrarAviso(resultado.mensaje);
+                        return;
+                    }
+
+                    mostrarModalCanje(resultado);
+                } catch (error) {
+                    cerrarConfirmacion();
+                    mostrarAviso('No se pudo procesar el canje. Intenta de nuevo.');
+                }
+            }
+
+            // --------------------- VENTANA DE AVISO DE ERROR ---------------------
+            function mostrarAviso(mensaje) {
+                document.getElementById('avisoMensaje').textContent = mensaje;
+                document.getElementById('modalAviso').classList.remove('oculto');
+            }
+
+            function recargarPagina() {
+                window.location.href = '/Recompensas';
+            }
+
+            // --------------------- VENTANA DEL QR (CANJE EXITOSO) ---------------------
+            function mostrarModalCanje(resultado) {
+                document.getElementById('modalTitulo').textContent = resultado.titulo;
+                document.getElementById('modalCodigo').textContent = resultado.codigo;
+                document.getElementById('saldoPuntos').textContent = resultado.puntosRestantes + ' pts';
+
+                // Se genera el QR que lleva a la página de inicio de la marca
+                const contenedor = document.getElementById('contenedorQr');
+                contenedor.innerHTML = '';
+                new QRCode(contenedor, {
+                    text: resultado.url,
+                    width: 180,
+                    height: 180,
+                    colorDark: '#1b5e20',
+                    colorLight: '#ffffff'
+                });
+
+                document.getElementById('modalCanje').classList.remove('oculto');
+            }
+
+            function cerrarModalCanje() {
+                // Se recarga para actualizar saldo, stock y botones
+                window.location.href = '/Recompensas';
+            }
+    </script>
 
 </body>
 </html>

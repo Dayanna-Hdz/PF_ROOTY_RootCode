@@ -1,6 +1,5 @@
 ﻿@page
-@using PF_ROOTY_RootCode.Pages
-@model MenuPrincipalModel
+@model PF_ROOTY_RootCode.Pages.MenuPrincipalModel
 @{
     ViewData["Title"] = "Menú Principal - Rooty";
     Layout = null;
@@ -12,44 +11,126 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
-    <!-- ------------------ ENLACE AL CSS EXTERNO ------------------ -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body>
+<body class="app-body">
 
-    <!-- ------------------ HEADER MENU ------------------ -->
-    <header class="header-landing">
-        <div class="logo-landing">🌱 Rooty - Menú Principal</div>
-        <div class="botones-header">
-            <a href="/" class="btn-login-nav">Cerrar Sesión</a>
+    <!-- BARRA DE NAVEGACIÓN INTERNA (MENÚS CENTRADOS) -->
+    <header class="navbar-interna">
+        <div class="logo-app">🌱 Rooty</div>
+        <nav class="nav-links-interna">
+            <a href="/MenuPrincipal" class="activo">Menú Principal</a>
+            <a href="/AgregarNuevoAporte">Agregar Aporte</a>
+            <a href="/Recompensas">Canjear Recompensas</a>
+            <a href="/Perfil">Mi Perfil</a>
+        </nav>
+        <div class="usuario-saludo">
+            <a href="/Logout" class="btn-cerrar-sesion">Cerrar Sesión</a>
         </div>
     </header>
 
-    <!-- ------------------ CUADRICULA DE OPCIONES ------------------ -->
-    <main class="contenedor-menu">
-        <h2>Bienvenido al Sistema</h2>
-        <p>Selecciona la opción a la que deseas ingresar:</p>
+    <!-- CONTENIDO PRINCIPAL (PERFIL + DASHBOARD) -->
+    <main class="contenedor-app">
 
-        <div class="cuadricula-secciones">
-            <a href="/Perfil" class="tarjeta-opcion">
-                <h3>👤 Mi Perfil</h3>
-            </a>
-            <a href="/AcreditarPuntos" class="tarjeta-opcion">
-                <h3>♻️ Acreditar Puntos</h3>
-            </a>
-            <a href="/Recompensas" class="tarjeta-opcion">
-                <h3>🎁 Recompensas</h3>
-            </a>
-            <a href="/MapaPuntos" class="tarjeta-opcion">
-                <h3>📍 Mapa de Puntos</h3>
-            </a>
-        </div>
+        <!-- TARJETA MINIMALISTA DE PERFIL Y NIVEL ACTUAL -->
+        <section class="banner-perfil-usuario">
+            <div class="perfil-identidad">
+                <div class="avatar-iniciales">@Model.Inicial</div>
+                <div>
+                    <h1>¡Hola, @Model.NombreCompleto!</h1>
+                </div>
+            </div>
+            <div class="perfil-rango-box">
+                <span class="etiqueta-rango">Rango Actual</span>
+                <strong class="valor-rango">@Model.NivelActual</strong>
+            </div>
+        </section>
+
+        <!-- TARJETAS SUPERIORES DE MÉTRICAS (ESTILO MINIMALISTA) -->
+        <section class="grid-metricas-minimal">
+            <div class="card-metrica-clean destacada">
+                <div class="metrica-top">
+                    <span>Puntos Disponibles</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <p class="metrica-numero">@Model.PuntosDisponibles <small>pts</small></p>
+            </div>
+
+            <div class="card-metrica-clean">
+                <div class="metrica-top">
+                    <span>PET Reciclado</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                </div>
+                <p class="metrica-numero">@Model.TotalKgReciclado.ToString("0.0") <small>kg</small></p>
+            </div>
+
+            <div class="card-metrica-clean">
+                <div class="metrica-top">
+                    <span>CO₂ Evitado</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                </div>
+                <p class="metrica-numero">@Model.TotalCo2Evitado.ToString("0.00") <small>kg</small></p>
+            </div>
+
+            <div class="card-metrica-clean">
+                <div class="metrica-top">
+                    <span>Niveles Desbloqueados</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                </div>
+                <p class="metrica-numero">@Model.InsigniasObtenidasCount <small>/ @Model.ListaInsignias.Count</small></p>
+            </div>
+        </section>
+
+        <!-- LÍNEA DEL TIEMPO HORIZONTAL EN ZIG-ZAG DE INSIGNIAS -->
+        <section class="panel-insignias-zigzag">
+            <div class="header-timeline">
+                <div>
+                    <h2>Ruta de Niveles Aliado Rooty</h2>
+                    <p>Desbloquea cada nivel automáticamente al acumular kg de CO₂ evitado y recibe puntos extra.</p>
+                </div>
+                <span class="badge-co2-actual">Impacto acumulado: <strong>@Model.TotalCo2Evitado.ToString("0.00") kg CO₂</strong></span>
+            </div>
+
+            <div class="timeline-scroll-wrapper">
+                <div class="timeline-zigzag-track">
+                    <svg class="zigzag-connector" viewBox="0 0 1000 120" preserveAspectRatio="none">
+                        <polyline points="50,25 150,95 250,25 350,95 450,25 550,95 650,25 750,95 850,25 950,95"
+                                  fill="none" stroke="#c8e6c9" stroke-width="4" stroke-dasharray="6,6" />
+                    </svg>
+
+                    @for (int i = 0; i < Model.ListaInsignias.Count; i++)
+                    {
+                        var ins = Model.ListaInsignias[i];
+                        string posicionClase = (i % 2 == 0) ? "nodo-arriba" : "nodo-abajo";
+                        string estadoClase = ins.Desbloqueada ? "desbloqueada" : "bloqueada";
+
+                        <div class="zigzag-item @posicionClase @estadoClase">
+                            <div class="nodo-circulo">
+                                @if (ins.Desbloqueada)
+                                {
+                                    <span class="nodo-icono-estrella">⭐</span>
+                                    <span class="check-badge">✓</span>
+                                }
+                                else
+                                {
+                                    <span class="nodo-icono-candado">🔒</span>
+                                }
+                            </div>
+                            <div class="nodo-info">
+                                <span class="nodo-pts">+@ins.PuntosRecompensa pts</span>
+                                <h4>@ins.Nombre</h4>
+                                <p>@ins.Co2Requerido.ToString("0") kg CO₂</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- ------------------ FOOTER ------------------ -->
-    <footer class="footer-global">
-        <p>Rooty - Plataforma de Reciclaje</p>
-    </footer>
+    <!-- FOOTER MINIMALISTA: FRANJA VERDE DELGADA -->
+    <footer class="footer-minimalista"></footer>
 
 </body>
 </html>

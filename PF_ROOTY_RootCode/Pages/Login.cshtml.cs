@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
@@ -35,23 +36,31 @@ namespace PF_ROOTY_RootCode.Pages
             {
                 using (SqlConnection con = new SqlConnection(conexion))
                 {
-                    string query = "SELECT COUNT(*) FROM USUARIOS WHERE correo = @correo AND password_hash = @password";
+                    string query = "SELECT usuario_id, nombre FROM USUARIOS WHERE correo = @correo AND password_hash = @password";
                     SqlCommand cmd = new SqlCommand(query, con);
                     cmd.Parameters.AddWithValue("@correo", Correo);
                     cmd.Parameters.AddWithValue("@password", Password);
 
                     con.Open();
-                    int existe = (int)cmd.ExecuteScalar();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            // Guardar ID y Nombre en la sesión para usarlos en MenuPrincipal y todo el sistema
+                            int usuarioId = reader.GetInt32(0);
+                            string nombreCompleto = reader.GetString(1);
 
-                    if (existe > 0)
-                    {
-                        // ------------------ REDIRECCION AL MENU PRINCIPAL ------------------
-                        return RedirectToPage("/MenuPrincipal");
-                    }
-                    else
-                    {
-                        Mensaje = "Correo o contraseña incorrectos.";
-                        return Page();
+                            HttpContext.Session.SetInt32("UsuarioId", usuarioId);
+                            HttpContext.Session.SetString("UsuarioNombre", nombreCompleto);
+
+                            // ------------------ REDIRECCION AL MENU PRINCIPAL ------------------
+                            return RedirectToPage("/MenuPrincipal");
+                        }
+                        else
+                        {
+                            Mensaje = "Correo o contraseña incorrectos.";
+                            return Page();
+                        }
                     }
                 }
             }

@@ -1,0 +1,344 @@
+﻿@page
+@model PF_ROOTY_RootCode.Pages.AgregarNuevoAporteModel
+@{
+    ViewData["Title"] = "Agregar Aporte - Rooty";
+    Layout = null;
+    bool esComprobante = !string.IsNullOrEmpty(Model.MensajeExito);
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Estilos de Leaflet  -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body class="app-body">
+
+    <!-- BARRA DE NAVEGACIÓN INTERNA (MENÚS CENTRADOS) -->
+    <header class="navbar-interna">
+        <div class="logo-app">🌱 Rooty</div>
+        <nav class="nav-links-interna">
+            <a href="/MenuPrincipal">Menú Principal</a>
+            <a href="/AgregarNuevoAporte" class="activo">Agregar Aporte</a>
+            <a href="/Recompensas">Canjear Recompensas</a>
+            <a href="/Perfil">Mi Perfil</a>
+        </nav>
+        <div class="usuario-saludo">
+            <a href="/Logout" class="btn-cerrar-sesion">Cerrar Sesión</a>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="contenedor-app">
+
+        <div class="encabezado-seccion">
+            <h1>Agregar Nuevo Aporte</h1>
+            <p>Selecciona en el mapa la plaza donde entregaste tus botellas PET, registra la fecha de entrega y obtén tu comprobante.</p>
+        </div>
+
+        <!-- INDICADOR DE 3 PASOS SIEMPRE VISIBLE -->
+        <div class="barra-pasos-aporte">
+            <div class="paso-pill @(esComprobante ? "completado" : "activo")" id="pill-paso-1">
+                <span class="paso-num">1</span> Elige el Centro de Acopio
+            </div>
+            <div class="paso-linea"></div>
+            <div class="paso-pill @(esComprobante ? "completado" : "")" id="pill-paso-2">
+                <span class="paso-num">2</span> Detalla Material y Fecha
+            </div>
+            <div class="paso-linea"></div>
+            <div class="paso-pill @(esComprobante ? "activo" : "")" id="pill-paso-3">
+                <span class="paso-num">3</span> Comprobante
+            </div>
+        </div>
+
+        @if (esComprobante)
+        {
+            <!-- PASO 3: COMPROBANTE DE APORTE REGISTRADO -->
+            <section class="tarjeta-exito-aporte" id="seccion-paso-3">
+                <div class="icono-exito-grande">🎉</div>
+                <h2>@Model.MensajeExito</h2>
+                <p>Centro de acopio: <strong>@Model.NombrePuntoComprobante</strong> · Peso entregado: <strong>@Model.PesoKg.ToString("0.0") kg</strong></p>
+
+                <div class="resumen-ganancia-grid">
+                    <div class="dato-ganancia">
+                        <span>Puntos Sumados</span>
+                        <strong>+@Model.PuntosGanadosUltimo pts</strong>
+                    </div>
+                    <div class="dato-ganancia">
+                        <span>CO₂ Evitado</span>
+                        <strong>+@Model.Co2GanadoUltimo.ToString("0.00") kg</strong>
+                    </div>
+                </div>
+
+                <!-- INSIGNIAS DESBLOQUEADAS CON ESTE APORTE -->
+                @if (Model.InsigniasNuevas.Count > 0)
+                {
+                    <div class="dato-ganancia">
+                        <span>🏅 ¡Nuevo nivel desbloqueado!</span>
+                        <strong>@string.Join(" · ", Model.InsigniasNuevas)</strong>
+                        <span>+@Model.PuntosExtraInsignias pts extra</span>
+                    </div>
+                }
+
+                <div class="acciones-exito-aporte">
+                    <a href="/MenuPrincipal" class="btn-accion btn-inline-auto">Volver al Menú Principal →</a>
+                    <a href="/AgregarNuevoAporte" class="btn-secundario-outline">Agregar otro aporte</a>
+                </div>
+            </section>
+        }
+        else
+        {
+            @if (!string.IsNullOrEmpty(Model.MensajeError))
+            {
+                <div class="alerta-error-box">⚠️ @Model.MensajeError</div>
+            }
+
+            <!-- PASO 1: MAPA Y LISTA DE PLAZAS COMERCIALES -->
+            <section class="layout-mapa-puntos" id="seccion-paso-1">
+                <div class="lista-puntos-panel">
+                    <div class="lista-puntos-header">
+                        <h3>Centros de Acopio (@Model.ListaPuntos.Count)</h3>
+                        <span>Selecciona uno</span>
+                    </div>
+
+                    <div class="lista-puntos-scroll">
+                        @for (int i = 0; i < Model.ListaPuntos.Count; i++)
+                        {
+                            var p = Model.ListaPuntos[i];
+                            <div class="tarjeta-punto-item" id="card-punto-@i" onclick="seleccionarPunto(@i)">
+                                <div class="punto-badge-num">@(i + 1)</div>
+                                <div class="punto-detalle-texto">
+                                    <h4>@p.NombrePunto</h4>
+                                    <p>📍 @p.UbicacionDetalle</p>
+                                    <span class="estado-punto-abierto">● Recepción activa de Botellas PET</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="columna-derecha-mapa">
+                    <div class="contenedor-mapa-canvas">
+                        <div id="mapaRooty"></div>
+                    </div>
+
+                    <!-- BARRA INFERIOR DE CONFIRMACIÓN DEL PUNTO -->
+                    <div class="barra-confirmar-punto" id="barraConfirmarPunto">
+                        <div id="textoPuntoElegido">
+                            <strong>Ningún centro seleccionado</strong>
+                            <span>Haz clic en un marcador verde del mapa o en una plaza de la lista.</span>
+                        </div>
+                        <button type="button" class="btn-continuar-paso" id="btnIrPaso2" disabled onclick="mostrarPaso2()">
+                            Continuar con este centro →
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PASO 2: FORMULARIO DE MATERIAL, PESO Y FECHA DE ENTREGA -->
+            <section class="panel-formulario-paso2 oculto" id="seccion-paso-2">
+                <div class="cabecera-punto-confirmado">
+                    <div>
+                        <span class="etiqueta-punto-ok">✓ Centro de Acopio Seleccionado</span>
+                        <h3 id="tituloPuntoPaso2">-</h3>
+                        <p id="direccionPuntoPaso2">-</p>
+                    </div>
+                    <button type="button" class="btn-cambiar-punto" onclick="volverAPaso1()">← Cambiar ubicación</button>
+                </div>
+
+                <form method="post" class="grid-form-aporte">
+                    <input type="hidden" asp-for="PuntoId" id="inputPuntoId" />
+
+                    <div class="columna-campos-aporte">
+                        <div class="grupo-campo">
+                            <label for="selectMaterial">Material Reciclado</label>
+                            <select asp-for="MaterialId" id="selectMaterial" class="input-select" onchange="calcularEstimado()" required>
+                                <option value="">-- Selecciona el material --</option>
+                                @foreach (var m in Model.ListaMateriales)
+                                {
+                                    <option value="@m.MaterialId" data-puntos="@m.PuntosPorKg" data-co2="@m.Co2PorKg">
+                                        @m.NombreMaterial (@m.PuntosPorKg pts / kg)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label for="inputPesoKg">Peso entregado (en Kilogramos)</label>
+                            <input type="number" asp-for="PesoKg" id="inputPesoKg" step="0.1" min="0.1" max="500"
+                                   placeholder="Ej. 2.5" oninput="calcularEstimado()" required />
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label for="inputFechaEntrega">Fecha de entrega del material</label>
+                            <input type="date" asp-for="FechaEntrega" id="inputFechaEntrega"
+                                   max="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+                    </div>
+
+                    <!-- TARJETA DE CÁLCULO EN TIEMPO REAL -->
+                    <div class="tarjeta-simulacion-aporte">
+                        <h4>Vista previa de tu aporte</h4>
+                        <p>Así impactará esta entrega en tu cuenta:</p>
+
+                        <div class="simulacion-numeros">
+                            <div class="sim-item">
+                                <span>Puntos a recibir</span>
+                                <strong id="previewPuntos">0 pts</strong>
+                            </div>
+                            <div class="sim-item">
+                                <span>CO₂ evitado</span>
+                                <strong id="previewCo2">0.00 kg</strong>
+                            </div>
+                        </div>
+
+                        <small class="nota-insignia-auto">
+                            💡 Si superas una meta de CO₂, tu siguiente nivel de <strong>Aliado Rooty</strong> se desbloqueará automáticamente al confirmar tu aporte.
+                        </small>
+
+                        <button type="submit" class="btn-accion">Confirmar y Generar Comprobante</button>
+                    </div>
+                </form>
+            </section>
+        }
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer-minimalista"></footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+            const puntosData = @Html.Raw(Model.PuntosJson);
+            let puntoSeleccionadoObj = null;
+
+            const mapaEl = document.getElementById('mapaRooty');
+            if (mapaEl) {
+                const mapa = L.map('mapaRooty').setView([25.6950, -100.3100], 11);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap | Rooty'
+                }).addTo(mapa);
+
+                const iconoRooty = L.divIcon({
+                    className: 'custom-pin-rooty',
+                    html: `<div class="pin-verde">🌱</div>`,
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 36],
+                    popupAnchor: [0, -34]
+                });
+
+                const marcadores = [];
+
+                puntosData.forEach((punto, idx) => {
+                    const marker = L.marker([punto.Latitud, punto.Longitud], { icon: iconoRooty }).addTo(mapa);
+
+                    const popupHtml = `
+                                            <div class="popup-rooty">
+                                                <strong>${punto.NombrePunto}</strong>
+                                                <p>${punto.UbicacionDetalle}</p>
+                                                <button type="button" class="btn-popup-aporte" onclick="seleccionarPunto(${idx})">
+                                                    Elegir este centro ✓
+                                                </button>
+                                            </div>
+                                        `;
+
+                    marker.bindPopup(popupHtml);
+                    marker.on('click', () => seleccionarPunto(idx, false));
+                    marcadores.push(marker);
+                });
+
+                window.seleccionarPunto = function (indice, volar = true) {
+                    const punto = puntosData[indice];
+                    const marker = marcadores[indice];
+                    if (!punto || !marker) return;
+
+                    puntoSeleccionadoObj = punto;
+
+                    if (volar) {
+                        mapa.flyTo([punto.Latitud, punto.Longitud], 15, { duration: 1.0 });
+                    }
+                    marker.openPopup();
+
+                    document.querySelectorAll('.tarjeta-punto-item').forEach(el => el.classList.remove('seleccionado'));
+                    const card = document.getElementById('card-punto-' + indice);
+                    if (card) {
+                        card.classList.add('seleccionado');
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+
+                    document.getElementById('textoPuntoElegido').innerHTML = `
+                                            <strong>Seleccionado: ${punto.NombrePunto}</strong>
+                                            <span>${punto.UbicacionDetalle}</span>
+                                        `;
+
+                    const btn = document.getElementById('btnIrPaso2');
+                    btn.disabled = false;
+                };
+            }
+
+            function mostrarPaso2() {
+                if (!puntoSeleccionadoObj) return;
+
+                document.getElementById('inputPuntoId').value = puntoSeleccionadoObj.PuntoId;
+                document.getElementById('tituloPuntoPaso2').textContent = puntoSeleccionadoObj.NombrePunto;
+                document.getElementById('direccionPuntoPaso2').textContent = puntoSeleccionadoObj.UbicacionDetalle;
+
+                document.getElementById('seccion-paso-1').classList.add('oculto');
+                document.getElementById('seccion-paso-2').classList.remove('oculto');
+
+                document.getElementById('pill-paso-1').classList.remove('activo');
+                document.getElementById('pill-paso-1').classList.add('completado');
+                document.getElementById('pill-paso-2').classList.add('activo');
+            }
+
+            function volverAPaso1() {
+                document.getElementById('seccion-paso-2').classList.add('oculto');
+                document.getElementById('seccion-paso-1').classList.remove('oculto');
+
+                document.getElementById('pill-paso-2').classList.remove('activo');
+                document.getElementById('pill-paso-1').classList.remove('completado');
+                document.getElementById('pill-paso-1').classList.add('activo');
+            }
+
+            function calcularEstimado() {
+                const select = document.getElementById('selectMaterial');
+                const peso = parseFloat(document.getElementById('inputPesoKg').value) || 0;
+                const opcion = select.options[select.selectedIndex];
+
+                if (!opcion || !opcion.value || peso <= 0) {
+                    document.getElementById('previewPuntos').textContent = '0 pts';
+                    document.getElementById('previewCo2').textContent = '0.00 kg';
+                    return;
+                }
+
+                const ptsKg = parseFloat(opcion.getAttribute('data-puntos')) || 0;
+                const co2Kg = parseFloat(opcion.getAttribute('data-co2')) || 0;
+
+                const totalPts = Math.round(peso * ptsKg);
+                const totalCo2 = (peso * co2Kg).toFixed(2);
+
+                document.getElementById('previewPuntos').textContent = totalPts + ' pts';
+                document.getElementById('previewCo2').textContent = totalCo2 + ' kg';
+            }
+
+            /* --------------------- RESTAURAR CENTRO SI EL SERVIDOR RECHAZO EL APORTE ---------------------
+               Si hubo un error al guardar, se vuelve directo al paso 2 con el centro y los datos ya escritos. */
+            const puntoPrevioId = @Model.PuntoId;
+            if (puntoPrevioId > 0 && mapaEl) {
+                const indicePrevio = puntosData.findIndex(p => p.PuntoId === puntoPrevioId);
+                if (indicePrevio >= 0) {
+                    window.seleccionarPunto(indicePrevio, false);
+                    mostrarPaso2();
+                    calcularEstimado();
+                }
+            }
+    </script>
+
+</body>
+</html>

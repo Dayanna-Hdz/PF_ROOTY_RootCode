@@ -1,5 +1,5 @@
 ﻿@page
-@using PF_ROOTY_RootCode.Pages
+@model PF_ROOTY_RootCode.Pages.PerfilModel
 @{
     ViewData["Title"] = "Mi Perfil - Rooty";
     Layout = null;
@@ -8,31 +8,270 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- ------------------ CONFIGURACION Y ESTILOS ------------------ -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-</head>
-<body>
 
-    <!-- ------------------ CABECERA / NAVEGACION ------------------ -->
-    <header class="header-landing">
-        <div class="logo-landing">🌱 Rooty</div>
-        <div class="botones-header">
-            <a href="/MenuPrincipal" class="btn-login-nav">← Volver al Menú</a>
+    @* --------------------- ESTILOS DE LAS TABLAS DE HISTORIAL --------------------- *@
+    <style>
+            .grid-historiales {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                margin-top: 2rem;
+            }
+
+            .panel-historial {
+                background: var(--color-tarjeta);
+                border: 1px solid #e0e6e3;
+                border-radius: 16px;
+                padding: 1.5rem 1.8rem;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            }
+
+            .header-historial {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+
+                .header-historial h2 {
+                    margin: 0;
+                    color: var(--color-primario-oscuro);
+                    font-size: 1.25rem;
+                }
+
+                .header-historial span {
+                    font-size: 0.82rem;
+                    color: #78909c;
+                }
+
+            .tabla-scroll {
+                overflow-x: auto;
+            }
+
+            .tabla-historial {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.9rem;
+            }
+
+                .tabla-historial th {
+                    text-align: left;
+                    padding: 0.7rem 0.8rem;
+                    font-size: 0.75rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    color: #64748b;
+                    border-bottom: 2px solid #e8f5e9;
+                    white-space: nowrap;
+                }
+
+                .tabla-historial td {
+                    padding: 0.8rem;
+                    border-bottom: 1px solid #eef2f0;
+                    color: #2c3e50;
+                }
+
+                .tabla-historial tbody tr:hover {
+                    background-color: #f8fbf9;
+                }
+
+            .celda-puntos {
+                font-weight: 700;
+                color: var(--color-primario);
+                white-space: nowrap;
+            }
+
+                .celda-puntos.negativo {
+                    color: #c62828;
+                }
+
+            .celda-codigo {
+                font-family: Consolas, 'Courier New', monospace;
+                font-size: 0.82rem;
+                color: var(--color-primario-oscuro);
+                white-space: nowrap;
+            }
+
+            .historial-vacio {
+                text-align: center;
+                padding: 2rem 1rem;
+                color: #78909c;
+            }
+
+                .historial-vacio a {
+                    color: var(--color-primario);
+                    font-weight: 600;
+                }
+    </style>
+</head>
+<body class="app-body">
+
+    @* --------------------- BARRA DE NAVEGACION INTERNA --------------------- *@
+    <header class="navbar-interna">
+        <div class="logo-app">🌱 Rooty</div>
+        <nav class="nav-links-interna">
+            <a href="/MenuPrincipal">Menú Principal</a>
+            <a href="/AgregarNuevoAporte">Agregar Aporte</a>
+            <a href="/Recompensas">Canjear Recompensas</a>
+            <a href="/Perfil" class="activo">Mi Perfil</a>
+        </nav>
+        <div class="usuario-saludo">
+            <a href="/Logout" class="btn-cerrar-sesion">Cerrar Sesión</a>
         </div>
     </header>
 
-    <!-- ------------------ CONTENIDO PRINCIPAL ------------------ -->
-    <main class="contenedor-hero">
-        <h1 class="titulo-hero">Sección Mi Perfil</h1>
+    @* --------------------- CONTENIDO PRINCIPAL --------------------- *@
+    <main class="contenedor-app">
+
+        @* --------------------- BANNER DE PERFIL Y NIVEL --------------------- *@
+        <section class="banner-perfil-usuario">
+            <div class="perfil-identidad">
+                <div class="avatar-iniciales">@Model.Inicial</div>
+                <div>
+                    <h1>¡Hola, @Model.NombreCompleto!</h1>
+                </div>
+            </div>
+            <div class="perfil-rango-box">
+                <span class="etiqueta-rango">Rango Actual</span>
+                <strong class="valor-rango">@Model.NivelActual</strong>
+            </div>
+        </section>
+
+        @* --------------------- TARJETAS DE METRICAS --------------------- *@
+        <section class="grid-metricas-minimal">
+            <div class="card-metrica-clean destacada">
+                <div class="metrica-top">
+                    <span>Puntos Disponibles</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <p class="metrica-numero">@Model.PuntosDisponibles <small>pts</small></p>
+            </div>
+
+            <div class="card-metrica-clean">
+                <div class="metrica-top">
+                    <span>PET Reciclado</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                </div>
+                <p class="metrica-numero">@Model.TotalKgReciclado.ToString("0.0") <small>kg</small></p>
+            </div>
+
+            <div class="card-metrica-clean">
+                <div class="metrica-top">
+                    <span>CO₂ Evitado</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                </div>
+                <p class="metrica-numero">@Model.TotalCo2Evitado.ToString("0.00") <small>kg</small></p>
+            </div>
+
+            <div class="card-metrica-clean">
+                <div class="metrica-top">
+                    <span>Niveles Desbloqueados</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                </div>
+                <p class="metrica-numero">@Model.InsigniasObtenidasCount <small>/ @Model.InsigniasTotal</small></p>
+            </div>
+        </section>
+
+        <section class="grid-historiales">
+
+            @* --------------------- HISTORIAL DE APORTACIONES --------------------- *@
+            <div class="panel-historial">
+                <div class="header-historial">
+                    <h2>Historial de Aportaciones</h2>
+                    <span>Últimas 50 entregas</span>
+                </div>
+
+                @if (Model.HistorialAportes.Count == 0)
+                {
+                    <div class="historial-vacio">
+                        Aún no has registrado aportaciones. <a href="/AgregarNuevoAporte">Registra tu primer aporte</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="tabla-scroll">
+                        <table class="tabla-historial">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Centro de Acopio</th>
+                                    <th>Material</th>
+                                    <th>Peso</th>
+                                    <th>CO₂ Evitado</th>
+                                    <th>Puntos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var a in Model.HistorialAportes)
+                                {
+                                    <tr>
+                                        <td>@a.Fecha.ToString("dd/MM/yyyy")</td>
+                                        <td>@a.Centro</td>
+                                        <td>@a.Material</td>
+                                        <td>@a.PesoKg.ToString("0.0") kg</td>
+                                        <td>@a.Co2.ToString("0.00") kg</td>
+                                        <td class="celda-puntos">+@a.Puntos pts</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+            @* --------------------- HISTORIAL DE CANJES --------------------- *@
+            <div class="panel-historial">
+                <div class="header-historial">
+                    <h2>Historial de Canjes</h2>
+                    <span>Últimos 50 canjes</span>
+                </div>
+
+                @if (Model.HistorialCanjes.Count == 0)
+                {
+                    <div class="historial-vacio">
+                        Aún no has canjeado recompensas. <a href="/Recompensas">Ver recompensas</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="tabla-scroll">
+                        <table class="tabla-historial">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Recompensa</th>
+                                    <th>Código de Canje</th>
+                                    <th>Puntos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var c in Model.HistorialCanjes)
+                                {
+                                    <tr>
+                                        <td>@c.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@c.Recompensa</td>
+                                        <td class="celda-codigo">@c.Codigo</td>
+                                        <td class="celda-puntos negativo">-@c.CostoPuntos pts</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+        </section>
+
     </main>
 
-    <!-- ------------------ PIE DE PAGINA ------------------ -->
-    <footer class="footer-global">
-        <p>Rooty - Plataforma de Reciclaje</p>
-    </footer>
+    @* --------------------- FOOTER --------------------- *@
+    <footer class="footer-minimalista"></footer>
 
 </body>
 </html>
