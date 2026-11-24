@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace PF_ROOTY_RootCode.Pages
 {
@@ -17,6 +18,9 @@ namespace PF_ROOTY_RootCode.Pages
         // ------------------ LIMITES DE VALIDACION ------------------
         private const decimal PesoMinimoKg = 0.1m;
         private const decimal PesoMaximoKg = 500m;
+
+        // Folio: letras mayusculas, numeros y guiones, de 6 a 20 caracteres (ej. ROOTY-4821-9F3A)
+        private static readonly Regex PatronFolio = new Regex(@"^[A-Z0-9\-]{6,20}$", RegexOptions.Compiled);
 
         // ------------------ PROPIEDADES DE LA VISTA ------------------
         public string PrimerNombre { get; set; } = "Reciclador";
@@ -47,6 +51,10 @@ namespace PF_ROOTY_RootCode.Pages
 
         [BindProperty]
         public DateTime FechaEntrega { get; set; } = DateTime.Today;
+
+        // Folio del comprobante que entrega el centro de acopio
+        [BindProperty]
+        public string Folio { get; set; } = string.Empty;
 
         // ------------------ CARGA DE LA PAGINA ------------------
         public IActionResult OnGet()
@@ -117,6 +125,19 @@ namespace PF_ROOTY_RootCode.Pages
                 return Page();
             }
 
+            // --------------------- VALIDACION DEL FOLIO DEL COMPROBANTE ---------------------
+            Folio = (Folio ?? string.Empty).Trim().ToUpperInvariant();
+            if (string.IsNullOrEmpty(Folio))
+            {
+                MensajeError = "Escribe el folio del comprobante que te dio el centro de acopio.";
+                return Page();
+            }
+            if (!PatronFolio.IsMatch(Folio))
+            {
+                MensajeError = "El folio no es válido. Usa de 6 a 20 caracteres entre letras, números y guiones (ej. ROOTY-4821-9F3A).";
+                return Page();
+            }
+
             FechaEntrega = FechaEntrega.Date;
             var materialElegido = ListaMateriales.First(m => m.MaterialId == MaterialId);
 
@@ -146,10 +167,10 @@ namespace PF_ROOTY_RootCode.Pages
                                 }
                             }
 
-                            // 1. Insertar el registro de reciclaje con la fecha elegida
+                            // 1. Insertar el registro de reciclaje con la fecha elegida y el folio (el folio no se puede repetir)
                             string sqlInsert = @"
-                                INSERT INTO REGISTROS_RECICLAJE (usuario_id, punto_id, material_id, peso_kg, puntos_otorgados, fecha)
-                                VALUES (@uid, @pid, @mid, @peso, @pts, @fecha)";
+                                INSERT INTO REGISTROS_RECICLAJE (usuario_id, punto_id, material_id, peso_kg, puntos_otorgados, fecha, folio_comprobante)
+                                VALUES (@uid, @pid, @mid, @peso, @pts, @fecha, @folio)";
                             using (SqlCommand cmd = new SqlCommand(sqlInsert, con, tx))
                             {
                                 cmd.Parameters.AddWithValue("@uid", usuarioId);
@@ -158,6 +179,7 @@ namespace PF_ROOTY_RootCode.Pages
                                 cmd.Parameters.AddWithValue("@peso", PesoKg);
                                 cmd.Parameters.AddWithValue("@pts", puntosOtorgados);
                                 cmd.Parameters.AddWithValue("@fecha", FechaEntrega);
+                                cmd.Parameters.AddWithValue("@folio", Folio);
                                 cmd.ExecuteNonQuery();
                             }
 
@@ -246,6 +268,14 @@ namespace PF_ROOTY_RootCode.Pages
                         }
                     }
                 }
+            }
+            catch (SqlException ex) when ((ex.Number == 2601 || ex.Number == 2627) && ex.Message.Contains("UX_REGISTROS_FOLIO"))
+            {
+                // El folio ya fue utilizado en otro aporte
+                InsigniasNuevas.Clear();
+                PuntosExtraInsignias = 0;
+                MensajeError = "Este folio ya fue utilizado. Cada comprobante solo se puede registrar una vez.";
+                return Page();
             }
             catch (Exception)
             {

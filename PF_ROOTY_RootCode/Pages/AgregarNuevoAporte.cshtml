@@ -18,6 +18,32 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <!-- Estilos de Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    @* --------------------- ESTILOS DEL CAMPO DE FOLIO --------------------- *@
+    <style>
+            .estado-folio {
+                display: block;
+                margin-top: 0.35rem;
+                font-size: 0.8rem;
+                color: #78909c;
+            }
+
+                .estado-folio.valido {
+                    color: var(--color-primario);
+                    font-weight: 700;
+                }
+
+                .estado-folio.invalido {
+                    color: #c62828;
+                    font-weight: 600;
+                }
+
+            #inputFolio {
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-family: Consolas, 'Courier New', monospace;
+            }
+    </style>
 </head>
 <body class="app-body">
 
@@ -40,7 +66,7 @@
 
         <div class="encabezado-seccion">
             <h1>Agregar Nuevo Aporte</h1>
-            <p>Selecciona en el mapa la plaza donde entregaste tus botellas PET, registra la fecha de entrega y obtén tu comprobante.</p>
+            <p>Selecciona en el mapa la plaza donde entregaste tus botellas PET, captura los datos de tu entrega con el folio de tu comprobante y obtén tus puntos.</p>
         </div>
 
         <!-- INDICADOR DE 3 PASOS SIEMPRE VISIBLE -->
@@ -50,7 +76,7 @@
             </div>
             <div class="paso-linea"></div>
             <div class="paso-pill @(esComprobante ? "completado" : "")" id="pill-paso-2">
-                <span class="paso-num">2</span> Detalla Material y Fecha
+                <span class="paso-num">2</span> Detalla tu Entrega
             </div>
             <div class="paso-linea"></div>
             <div class="paso-pill @(esComprobante ? "activo" : "")" id="pill-paso-3">
@@ -65,6 +91,7 @@
                 <div class="icono-exito-grande">🎉</div>
                 <h2>@Model.MensajeExito</h2>
                 <p>Centro de acopio: <strong>@Model.NombrePuntoComprobante</strong> · Peso entregado: <strong>@Model.PesoKg.ToString("0.0") kg</strong></p>
+                <p>Folio del comprobante: <strong>@Model.Folio</strong></p>
 
                 <div class="resumen-ganancia-grid">
                     <div class="dato-ganancia">
@@ -142,7 +169,7 @@
                 </div>
             </section>
 
-            <!-- PASO 2: FORMULARIO DE MATERIAL, PESO Y FECHA DE ENTREGA -->
+            <!-- PASO 2: FORMULARIO DE MATERIAL, PESO, FECHA Y FOLIO DE ENTREGA -->
             <section class="panel-formulario-paso2 oculto" id="seccion-paso-2">
                 <div class="cabecera-punto-confirmado">
                     <div>
@@ -153,7 +180,7 @@
                     <button type="button" class="btn-cambiar-punto" onclick="volverAPaso1()">← Cambiar ubicación</button>
                 </div>
 
-                <form method="post" class="grid-form-aporte">
+                <form method="post" class="grid-form-aporte" id="formularioAporte">
                     <input type="hidden" asp-for="PuntoId" id="inputPuntoId" />
 
                     <div class="columna-campos-aporte">
@@ -180,6 +207,15 @@
                             <label for="inputFechaEntrega">Fecha de entrega del material</label>
                             <input type="date" asp-for="FechaEntrega" id="inputFechaEntrega"
                                    max="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+
+                        @* --------------------- FOLIO DEL COMPROBANTE DEL CENTRO DE ACOPIO --------------------- *@
+                        <div class="grupo-campo">
+                            <label for="inputFolio">Folio del comprobante del centro de acopio</label>
+                            <input type="text" asp-for="Folio" id="inputFolio" maxlength="20" autocomplete="off"
+                                   placeholder="Ej. ROOTY-4821-9F3A" oninput="validarFolio()"
+                                   pattern="[A-Za-z0-9\-]{6,20}" title="De 6 a 20 caracteres: letras, números y guiones" required />
+                            <small class="estado-folio" id="estadoFolio">Es el folio que te entregan en el centro de acopio al pesar tus botellas.</small>
                         </div>
                     </div>
 
@@ -249,14 +285,14 @@
                     const marker = L.marker([punto.Latitud, punto.Longitud], { icon: iconoRooty }).addTo(mapa);
 
                     const popupHtml = `
-                                <div class="popup-rooty">
-                                    <strong>${punto.NombrePunto}</strong>
-                                    <p>${punto.UbicacionDetalle}</p>
-                                    <button type="button" class="btn-popup-aporte" onclick="seleccionarPunto(${idx})">
-                                        Elegir este centro ✓
-                                    </button>
-                                </div>
-                            `;
+                                            <div class="popup-rooty">
+                                                <strong>${punto.NombrePunto}</strong>
+                                                <p>${punto.UbicacionDetalle}</p>
+                                                <button type="button" class="btn-popup-aporte" onclick="seleccionarPunto(${idx})">
+                                                    Elegir este centro ✓
+                                                </button>
+                                            </div>
+                                        `;
 
                     marker.bindPopup(popupHtml);
                     marker.on('click', () => seleccionarPunto(idx, false));
@@ -283,9 +319,9 @@
                     }
 
                     document.getElementById('textoPuntoElegido').innerHTML = `
-                                <strong>Seleccionado: ${punto.NombrePunto}</strong>
-                                <span>${punto.UbicacionDetalle}</span>
-                            `;
+                                            <strong>Seleccionado: ${punto.NombrePunto}</strong>
+                                            <span>${punto.UbicacionDetalle}</span>
+                                        `;
 
                     const btn = document.getElementById('btnIrPaso2');
                     btn.disabled = false;
@@ -337,6 +373,30 @@
                 document.getElementById('previewCo2').textContent = totalCo2 + ' kg';
             }
 
+            /* --------------------- VALIDACION EN VIVO DEL FOLIO ---------------------
+               Revisa el formato mientras se escribe: de 6 a 20 caracteres entre letras, numeros y guiones. */
+            function validarFolio() {
+                const campo = document.getElementById('inputFolio');
+                const aviso = document.getElementById('estadoFolio');
+                if (!campo || !aviso) return;
+
+                const valor = campo.value.trim().toUpperCase();
+
+                if (valor.length === 0) {
+                    aviso.className = 'estado-folio';
+                    aviso.textContent = 'Es el folio que te entregan en el centro de acopio al pesar tus botellas.';
+                    return;
+                }
+
+                if (/^[A-Z0-9\-]{6,20}$/.test(valor)) {
+                    aviso.className = 'estado-folio valido';
+                    aviso.textContent = '✓ Folio válido';
+                } else {
+                    aviso.className = 'estado-folio invalido';
+                    aviso.textContent = 'Formato no válido: usa de 6 a 20 caracteres entre letras, números y guiones.';
+                }
+            }
+
             /* --------------------- RESTAURAR CENTRO SI EL SERVIDOR RECHAZO EL APORTE ---------------------
                Si hubo un error al guardar, se vuelve directo al paso 2 con el centro y los datos ya escritos. */
             const puntoPrevioId = @Model.PuntoId;
@@ -346,6 +406,7 @@
                     window.seleccionarPunto(indicePrevio, false);
                     mostrarPaso2();
                     calcularEstimado();
+                    validarFolio();
                 }
             }
     </script>

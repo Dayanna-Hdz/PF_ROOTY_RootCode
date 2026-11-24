@@ -13,34 +13,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    @* --------------------- ESTILOS DE LOS REQUISITOS DE CONTRASEÑA --------------------- *@
+    <style>
+            .lista-requisitos {
+                list-style: none;
+                margin: 0.6rem 0 0 0;
+                padding: 0;
+                font-size: 0.8rem;
+                color: #78909c;
+            }
+
+                .lista-requisitos li {
+                    padding: 0.1rem 0;
+                }
+
+                    .lista-requisitos li::before {
+                        content: "○ ";
+                    }
+
+                    .lista-requisitos li.requisito-cumplido {
+                        color: var(--color-primario);
+                        font-weight: 600;
+                    }
+
+                        .lista-requisitos li.requisito-cumplido::before {
+                            content: "✓ ";
+                        }
+
+            .texto-ayuda-campo {
+                display: block;
+                margin-top: 0.3rem;
+                font-size: 0.78rem;
+                color: #78909c;
+            }
+
+            .mensaje-error-registro {
+                color: #c62828;
+                background-color: #ffebee;
+                border: 1px solid #ffcdd2;
+                border-radius: 8px;
+                padding: 0.7rem 0.9rem;
+                font-size: 0.9rem;
+                font-weight: 600;
+                text-align: left;
+            }
+    </style>
 </head>
 <body>
 
-    <!-- ------------------ CONTENEDOR CENTRADO ------------------ -->
+    @* --------------------- CONTENEDOR CENTRADO --------------------- *@
     <div class="contenedor-centrado">
         <div class="tarjeta-formulario">
             <h2>Crear Cuenta</h2>
 
             @if (!string.IsNullOrEmpty(Model.Mensaje))
             {
-                <p style="color: red;">@Model.Mensaje</p>
+                <p class="mensaje-error-registro">@Model.Mensaje</p>
             }
 
-            <!-- ------------------ FORMULARIO DE REGISTRO ------------------ -->
-            <form method="post">
+            @* --------------------- FORMULARIO DE REGISTRO --------------------- *@
+            <form method="post" id="formularioRegistro">
                 <div class="grupo-campo">
                     <label>Nombre Completo</label>
-                    <input type="text" asp-for="Nombre" placeholder="Tu nombre" required />
+                    <input type="text" asp-for="Nombre" placeholder="Tu nombre" minlength="2" maxlength="100" required />
                 </div>
 
                 <div class="grupo-campo">
                     <label>Correo Electrónico</label>
-                    <input type="email" asp-for="Correo" placeholder="correo@ejemplo.com" required />
+                    <input type="email" asp-for="Correo" placeholder="nombre@gmail.com" maxlength="100"
+                           pattern=".+@@.+\..{2,}" title="Escribe un correo válido, por ejemplo: nombre@gmail.com" required />
+                    <small class="texto-ayuda-campo">Debe incluir @@ y un dominio, por ejemplo gmail.com</small>
                 </div>
 
                 <div class="grupo-campo">
                     <label>Contraseña</label>
-                    <input type="password" asp-for="Password" placeholder="••••••••" required />
+                    <input type="password" asp-for="Password" id="campoPassword" placeholder="••••••••"
+                           minlength="8" maxlength="64" autocomplete="new-password" required />
+
+                    @* Lista de requisitos que se marca en vivo mientras se escribe *@
+                    <ul class="lista-requisitos">
+                        <li id="req-largo">Mínimo 8 caracteres</li>
+                        <li id="req-mayuscula">Una letra mayúscula</li>
+                        <li id="req-minuscula">Una letra minúscula</li>
+                        <li id="req-numero">Un número</li>
+                    </ul>
+                </div>
+
+                <div class="grupo-campo">
+                    <label>Confirmar Contraseña</label>
+                    <input type="password" asp-for="ConfirmarPassword" id="campoConfirmar" placeholder="••••••••"
+                           maxlength="64" autocomplete="new-password" required />
+                    <small class="texto-ayuda-campo" id="avisoCoincidencia"></small>
                 </div>
 
                 <button type="submit" class="btn-accion">Registrarse</button>
@@ -51,6 +115,68 @@
             <p><a href="/">Volver al inicio</a></p>
         </div>
     </div>
+
+    @* --------------------- LOGICA DE REQUISITOS DE CONTRASEÑA --------------------- *@
+    <script>
+            /* --------------------- REFERENCIAS A LOS CAMPOS --------------------- */
+            const campoPassword = document.getElementById('campoPassword');
+            const campoConfirmar = document.getElementById('campoConfirmar');
+            const avisoCoincidencia = document.getElementById('avisoCoincidencia');
+            const formularioRegistro = document.getElementById('formularioRegistro');
+
+            /* --------------------- MARCAR UN REQUISITO COMO CUMPLIDO O NO --------------------- */
+            function marcarRequisito(idElemento, cumplido) {
+                document.getElementById(idElemento).classList.toggle('requisito-cumplido', cumplido);
+            }
+
+            /* --------------------- REVISAR REQUISITOS MIENTRAS SE ESCRIBE --------------------- */
+            function revisarPassword() {
+                const valor = campoPassword.value;
+                marcarRequisito('req-largo', valor.length >= 8);
+                marcarRequisito('req-mayuscula', /[A-Z]/.test(valor));
+                marcarRequisito('req-minuscula', /[a-z]/.test(valor));
+                marcarRequisito('req-numero', /[0-9]/.test(valor));
+                revisarCoincidencia();
+            }
+
+            /* --------------------- REVISAR QUE AMBAS CONTRASEÑAS COINCIDAN --------------------- */
+            function revisarCoincidencia() {
+                if (campoConfirmar.value.length === 0) {
+                    avisoCoincidencia.textContent = '';
+                    return;
+                }
+                if (campoConfirmar.value === campoPassword.value) {
+                    avisoCoincidencia.textContent = '✓ Las contraseñas coinciden';
+                    avisoCoincidencia.style.color = 'var(--color-primario)';
+                } else {
+                    avisoCoincidencia.textContent = 'Las contraseñas no coinciden';
+                    avisoCoincidencia.style.color = '#c62828';
+                }
+            }
+
+            campoPassword.addEventListener('input', revisarPassword);
+            campoConfirmar.addEventListener('input', revisarCoincidencia);
+
+            /* --------------------- BLOQUEAR EL ENVIO SI NO CUMPLE LOS REQUISITOS --------------------- */
+            formularioRegistro.addEventListener('submit', function (evento) {
+                const valor = campoPassword.value;
+                const cumple = valor.length >= 8 && /[A-Z]/.test(valor) && /[a-z]/.test(valor) && /[0-9]/.test(valor);
+
+                if (!cumple) {
+                    evento.preventDefault();
+                    campoPassword.focus();
+                    avisoCoincidencia.textContent = '';
+                    alert('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.');
+                    return;
+                }
+
+                if (campoPassword.value !== campoConfirmar.value) {
+                    evento.preventDefault();
+                    campoConfirmar.focus();
+                    revisarCoincidencia();
+                }
+            });
+    </script>
 
 </body>
 </html>
