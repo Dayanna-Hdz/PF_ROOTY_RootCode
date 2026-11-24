@@ -13,7 +13,7 @@ namespace PF_ROOTY_RootCode.Pages
     public class AgregarNuevoAporteModel : PageModel
     {
         // ------------------ CONEXION BASE DE DATOS ------------------
-        private string conexion = "Server=localhost\\SQLEXPRESS;Database=ReciclajeDB;Trusted_Connection=True;TrustServerCertificate=True;";
+        private string conexion = "Server=db82448.databaseasp.net;Database=db82448;User Id=db82448;Password=tX@6!x5Tp8B?;Encrypt=False;MultipleActiveResultSets=True;";
 
         // ------------------ LIMITES DE VALIDACION ------------------
         private const decimal PesoMinimoKg = 0.1m;

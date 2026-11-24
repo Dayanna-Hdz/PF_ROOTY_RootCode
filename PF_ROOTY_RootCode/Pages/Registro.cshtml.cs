@@ -24,7 +24,7 @@ namespace PF_ROOTY_RootCode.Pages
         public string Mensaje { get; set; } = string.Empty;
 
         // ------------------ CONEXION BASE DE DATOS ------------------
-        private string conexion = "Server=localhost\\SQLEXPRESS;Database=ReciclajeDB;Trusted_Connection=True;TrustServerCertificate=True;";
+        private string conexion = "Server=db82448.databaseasp.net;Database=db82448;User Id=db82448;Password=tX@6!x5Tp8B?;Encrypt=False;MultipleActiveResultSets=True;";
 
         // ------------------ REGLAS DE VALIDACION ------------------
         private const int LargoMinimoPassword = 8;
