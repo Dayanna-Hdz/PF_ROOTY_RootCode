@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model PF_ROOTY_RootCode.Pages.RecompensasModel
 @{
     ViewData["Title"] = "Canjear Recompensas - Rooty";
@@ -18,59 +18,66 @@
 
     @* --------------------- ESTILOS EXTRA DE LAS VENTANAS DE CONFIRMACION Y AVISO --------------------- *@
     <style>
+        .modal-botones {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+            .modal-botones .btn-accion,
+            .modal-botones .btn-secundario-outline {
+                flex: 1;
+                width: auto;
+                cursor: pointer;
+                font-size: 0.95rem;
+                background-color: #ffffff;
+                box-sizing: border-box;
+            }
+
+            .modal-botones .btn-accion {
+                background-color: var(--color-primario);
+            }
+
+        .modal-resumen-canje {
+            background-color: #f1f8f4;
+            border: 1px solid #c8e6c9;
+            border-radius: 12px;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.4rem;
+            text-align: left;
+        }
+
+        .modal-fila-resumen {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #607d8b;
+            padding: 0.3rem 0;
+        }
+
+            .modal-fila-resumen strong {
+                color: var(--color-primario-oscuro);
+            }
+
+            .modal-fila-resumen.total {
+                border-top: 1px dashed #c8e6c9;
+                margin-top: 0.3rem;
+                padding-top: 0.6rem;
+            }
+
+        @@media (max-width: 480px) {
             .modal-botones {
-                display: flex;
-                gap: 0.8rem;
+                flex-direction: column-reverse;
             }
-
-                .modal-botones .btn-accion,
-                .modal-botones .btn-secundario-outline {
-                    flex: 1;
-                    width: auto;
-                    cursor: pointer;
-                    font-size: 0.95rem;
-                    background-color: #ffffff;
-                    box-sizing: border-box;
-                }
-
-                .modal-botones .btn-accion {
-                    background-color: var(--color-primario);
-                }
-
-            .modal-resumen-canje {
-                background-color: #f1f8f4;
-                border: 1px solid #c8e6c9;
-                border-radius: 12px;
-                padding: 0.9rem 1rem;
-                margin-bottom: 1.4rem;
-                text-align: left;
-            }
-
-            .modal-fila-resumen {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 0.9rem;
-                color: #607d8b;
-                padding: 0.3rem 0;
-            }
-
-                .modal-fila-resumen strong {
-                    color: var(--color-primario-oscuro);
-                }
-
-                .modal-fila-resumen.total {
-                    border-top: 1px dashed #c8e6c9;
-                    margin-top: 0.3rem;
-                    padding-top: 0.6rem;
-                }
+        }
     </style>
 </head>
 <body class="app-body">
 
     @* --------------------- BARRA DE NAVEGACION INTERNA --------------------- *@
-    <header class="navbar-interna">
+    <header class="navbar-interna" id="navbarInterna">
         <div class="logo-app">🌱 Rooty</div>
+        <button type="button" class="btn-menu-movil" id="btnMenuInterno" aria-label="Abrir menú">☰</button>
         <nav class="nav-links-interna">
             <a href="/MenuPrincipal">Menú Principal</a>
             <a href="/AgregarNuevoAporte">Agregar Aporte</a>
@@ -215,107 +222,116 @@
 
     @* --------------------- LOGICA DE CANJE Y VENTANAS --------------------- *@
     <script>
-            // Bloquea el botón Atrás del navegador tras cerrar sesión (BFCache)
-            window.addEventListener('pageshow', function (event) {
-                if (event.persisted) {
-                    window.location.reload();
+        const navbarInterna = document.getElementById('navbarInterna');
+        const btnMenuInterno = document.getElementById('btnMenuInterno');
+        if (btnMenuInterno && navbarInterna) {
+            btnMenuInterno.addEventListener('click', () => {
+                const abierto = navbarInterna.classList.toggle('menu-abierto');
+                btnMenuInterno.textContent = abierto ? '✕' : '☰';
+            });
+        }
+
+        // Bloquea el botón Atrás del navegador tras cerrar sesión (BFCache)
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        // Saldo actual tomado del servidor y recompensa elegida en la ventana de confirmación
+        const saldoActual = @Model.PuntosDisponibles;
+        let recompensaElegidaId = null;
+        let recompensaElegidaCosto = 0;
+
+        // --------------------- ABRIR VENTANA DE CONFIRMACION ---------------------
+        function abrirConfirmacion(boton) {
+            recompensaElegidaId = boton.getAttribute('data-id');
+            recompensaElegidaCosto = parseInt(boton.getAttribute('data-costo'));
+            const titulo = boton.getAttribute('data-titulo');
+
+            document.getElementById('confirmarTitulo').textContent = titulo;
+            document.getElementById('confirmarSaldo').textContent = saldoActual + ' pts';
+            document.getElementById('confirmarCosto').textContent = '- ' + recompensaElegidaCosto + ' pts';
+            document.getElementById('confirmarRestante').textContent = (saldoActual - recompensaElegidaCosto) + ' pts';
+
+            const btn = document.getElementById('btnConfirmarCanje');
+            btn.disabled = false;
+            btn.textContent = 'Sí, canjear';
+
+            document.getElementById('modalConfirmar').classList.remove('oculto');
+        }
+
+        function cerrarConfirmacion() {
+            document.getElementById('modalConfirmar').classList.add('oculto');
+        }
+
+        // --------------------- ENVIAR EL CANJE AL SERVIDOR ---------------------
+        async function confirmarCanje() {
+            const btn = document.getElementById('btnConfirmarCanje');
+            btn.disabled = true;
+            btn.textContent = 'Procesando...';
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const datos = new URLSearchParams();
+            datos.append('recompensaId', recompensaElegidaId);
+            datos.append('__RequestVerificationToken', token);
+
+            try {
+                const respuesta = await fetch('/Recompensas?handler=Canjear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: datos.toString()
+                });
+                const resultado = await respuesta.json();
+
+                cerrarConfirmacion();
+
+                if (!resultado.ok) {
+                    mostrarAviso(resultado.mensaje);
+                    return;
                 }
+
+                mostrarModalCanje(resultado);
+            } catch (error) {
+                cerrarConfirmacion();
+                mostrarAviso('No se pudo procesar el canje. Intenta de nuevo.');
+            }
+        }
+
+        // --------------------- VENTANA DE AVISO DE ERROR ---------------------
+        function mostrarAviso(mensaje) {
+            document.getElementById('avisoMensaje').textContent = mensaje;
+            document.getElementById('modalAviso').classList.remove('oculto');
+        }
+
+        function recargarPagina() {
+            window.location.href = '/Recompensas';
+        }
+
+        // --------------------- VENTANA DEL QR (CANJE EXITOSO) ---------------------
+        function mostrarModalCanje(resultado) {
+            document.getElementById('modalTitulo').textContent = resultado.titulo;
+            document.getElementById('modalCodigo').textContent = resultado.codigo;
+            document.getElementById('saldoPuntos').textContent = resultado.puntosRestantes + ' pts';
+
+            // Se genera el QR que lleva a la página de inicio de la marca
+            const contenedor = document.getElementById('contenedorQr');
+            contenedor.innerHTML = '';
+            new QRCode(contenedor, {
+                text: resultado.url,
+                width: 180,
+                height: 180,
+                colorDark: '#1b5e20',
+                colorLight: '#ffffff'
             });
 
-            // Saldo actual tomado del servidor y recompensa elegida en la ventana de confirmación
-            const saldoActual = @Model.PuntosDisponibles;
-            let recompensaElegidaId = null;
-            let recompensaElegidaCosto = 0;
+            document.getElementById('modalCanje').classList.remove('oculto');
+        }
 
-            // --------------------- ABRIR VENTANA DE CONFIRMACION ---------------------
-            function abrirConfirmacion(boton) {
-                recompensaElegidaId = boton.getAttribute('data-id');
-                recompensaElegidaCosto = parseInt(boton.getAttribute('data-costo'));
-                const titulo = boton.getAttribute('data-titulo');
-
-                document.getElementById('confirmarTitulo').textContent = titulo;
-                document.getElementById('confirmarSaldo').textContent = saldoActual + ' pts';
-                document.getElementById('confirmarCosto').textContent = '- ' + recompensaElegidaCosto + ' pts';
-                document.getElementById('confirmarRestante').textContent = (saldoActual - recompensaElegidaCosto) + ' pts';
-
-                const btn = document.getElementById('btnConfirmarCanje');
-                btn.disabled = false;
-                btn.textContent = 'Sí, canjear';
-
-                document.getElementById('modalConfirmar').classList.remove('oculto');
-            }
-
-            function cerrarConfirmacion() {
-                document.getElementById('modalConfirmar').classList.add('oculto');
-            }
-
-            // --------------------- ENVIAR EL CANJE AL SERVIDOR ---------------------
-            async function confirmarCanje() {
-                const btn = document.getElementById('btnConfirmarCanje');
-                btn.disabled = true;
-                btn.textContent = 'Procesando...';
-
-                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                const datos = new URLSearchParams();
-                datos.append('recompensaId', recompensaElegidaId);
-                datos.append('__RequestVerificationToken', token);
-
-                try {
-                    const respuesta = await fetch('/Recompensas?handler=Canjear', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: datos.toString()
-                    });
-                    const resultado = await respuesta.json();
-
-                    cerrarConfirmacion();
-
-                    if (!resultado.ok) {
-                        mostrarAviso(resultado.mensaje);
-                        return;
-                    }
-
-                    mostrarModalCanje(resultado);
-                } catch (error) {
-                    cerrarConfirmacion();
-                    mostrarAviso('No se pudo procesar el canje. Intenta de nuevo.');
-                }
-            }
-
-            // --------------------- VENTANA DE AVISO DE ERROR ---------------------
-            function mostrarAviso(mensaje) {
-                document.getElementById('avisoMensaje').textContent = mensaje;
-                document.getElementById('modalAviso').classList.remove('oculto');
-            }
-
-            function recargarPagina() {
-                window.location.href = '/Recompensas';
-            }
-
-            // --------------------- VENTANA DEL QR (CANJE EXITOSO) ---------------------
-            function mostrarModalCanje(resultado) {
-                document.getElementById('modalTitulo').textContent = resultado.titulo;
-                document.getElementById('modalCodigo').textContent = resultado.codigo;
-                document.getElementById('saldoPuntos').textContent = resultado.puntosRestantes + ' pts';
-
-                // Se genera el QR que lleva a la página de inicio de la marca
-                const contenedor = document.getElementById('contenedorQr');
-                contenedor.innerHTML = '';
-                new QRCode(contenedor, {
-                    text: resultado.url,
-                    width: 180,
-                    height: 180,
-                    colorDark: '#1b5e20',
-                    colorLight: '#ffffff'
-                });
-
-                document.getElementById('modalCanje').classList.remove('oculto');
-            }
-
-            function cerrarModalCanje() {
-                // Se recarga para actualizar saldo, stock y botones
-                window.location.href = '/Recompensas';
-            }
+        function cerrarModalCanje() {
+            // Se recarga para actualizar saldo, stock y botones
+            window.location.href = '/Recompensas';
+        }
     </script>
 
 </body>
