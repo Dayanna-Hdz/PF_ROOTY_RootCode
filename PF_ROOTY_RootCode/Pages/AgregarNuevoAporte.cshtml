@@ -41,7 +41,7 @@
 
         <div class="encabezado-seccion">
             <h1>Agregar Nuevo Aporte</h1>
-            <p>Selecciona en el mapa la plaza donde entregaste tus botellas PET, registra la fecha de entrega y obtén tu comprobante.</p>
+            <p>Selecciona en el mapa la plaza donde entregaste tus botellas PET, registra el folio y la fecha de entrega para obtener tu comprobante.</p>
         </div>
 
         <!-- INDICADOR DE 3 PASOS SIEMPRE VISIBLE -->
@@ -66,6 +66,7 @@
                 <div class="icono-exito-grande">🎉</div>
                 <h2>@Model.MensajeExito</h2>
                 <p>Centro de acopio: <strong>@Model.NombrePuntoComprobante</strong> · Peso entregado: <strong>@Model.PesoKg.ToString("0.0") kg</strong></p>
+                <p>Folio registrado: <strong>@Model.Folio</strong></p>
 
                 <div class="resumen-ganancia-grid">
                     <div class="dato-ganancia">
@@ -143,7 +144,7 @@
                 </div>
             </section>
 
-            <!-- PASO 2: FORMULARIO DE MATERIAL, PESO Y FECHA DE ENTREGA -->
+            <!-- PASO 2: FORMULARIO DE MATERIAL, PESO, FOLIO Y FECHA DE ENTREGA -->
             <section class="panel-formulario-paso2 oculto" id="seccion-paso-2">
                 <div class="cabecera-punto-confirmado">
                     <div>
@@ -175,6 +176,17 @@
                             <label for="inputPesoKg">Peso entregado (en Kilogramos)</label>
                             <input type="number" asp-for="PesoKg" id="inputPesoKg" step="0.1" min="0.1" max="500"
                                    placeholder="Ej. 2.5" oninput="calcularEstimado()" required />
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label for="inputFolio">Folio del comprobante</label>
+                            <input type="text" asp-for="Folio" id="inputFolio" maxlength="20"
+                                   placeholder="Ej. ROOTY-4821-9F3A"
+                                   style="text-transform: uppercase;"
+                                   oninput="this.value = this.value.toUpperCase()" required />
+                            <small style="color: #607d8b; font-size: 0.8rem; display: block; margin-top: 0.3rem;">
+                                De 6 a 20 caracteres (letras, números y guiones).
+                            </small>
                         </div>
 
                         <div class="grupo-campo">
