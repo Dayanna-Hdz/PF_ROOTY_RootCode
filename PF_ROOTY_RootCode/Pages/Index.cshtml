@@ -1,4 +1,4 @@
-﻿@page
+@page
 @using PF_ROOTY_RootCode.Pages
 @model IndexModel
 @{
@@ -18,79 +18,91 @@
 
     @* --------------------- ESTILOS DE LA SECCION DE PUNTOS DE ACOPIO --------------------- *@
     <style>
-            .seccion-puntos-acopio {
-                padding: 4rem 1.5rem;
-                background-color: #ffffff;
+        .seccion-puntos-acopio {
+            padding: 4rem 1.5rem;
+            background-color: #ffffff;
+        }
+
+        .contenedor-puntos-acopio {
+            max-width: 1150px;
+            margin: 0 auto;
+        }
+
+        .encabezado-puntos-acopio {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+            .encabezado-puntos-acopio h2 {
+                color: var(--color-primario-oscuro);
+                font-size: clamp(1.5rem, 5vw, 2rem);
+                margin: 0 0 0.5rem 0;
             }
 
-            .contenedor-puntos-acopio {
-                max-width: 1150px;
-                margin: 0 auto;
+            .encabezado-puntos-acopio p {
+                color: #666666;
+                font-size: 1.05rem;
+                margin: 0;
             }
 
-            .encabezado-puntos-acopio {
-                text-align: center;
-                margin-bottom: 2rem;
-            }
+        .layout-puntos-publico {
+            display: grid;
+            grid-template-columns: 370px 1fr;
+            gap: 1.5rem;
+            background: var(--color-tarjeta);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e0e6e3;
+        }
 
-                .encabezado-puntos-acopio h2 {
-                    color: var(--color-primario-oscuro);
-                    font-size: 2rem;
-                    margin: 0 0 0.5rem 0;
-                }
+        .mapa-publico-marco {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #d5e0da;
+            height: 520px;
+        }
 
-                .encabezado-puntos-acopio p {
-                    color: #666666;
-                    font-size: 1.05rem;
-                    margin: 0;
-                }
+        #mapaPublicoRooty {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
 
+        .aviso-sin-puntos {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #78909c;
+        }
+
+        @@media (max-width: 900px) {
             .layout-puntos-publico {
-                display: grid;
-                grid-template-columns: 370px 1fr;
-                gap: 1.5rem;
-                background: var(--color-tarjeta);
-                padding: 1.5rem;
-                border-radius: 16px;
-                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-                border: 1px solid #e0e6e3;
-            }
-
-            @@media (max-width: 900px) {
-                .layout-puntos-publico {
-                    grid-template-columns: 1fr;
-                }
+                grid-template-columns: 1fr;
+                padding: 1rem;
             }
 
             .mapa-publico-marco {
-                border-radius: 12px;
-                overflow: hidden;
-                border: 1px solid #d5e0da;
-                height: 520px;
+                height: 340px;
             }
+        }
 
-            #mapaPublicoRooty {
-                width: 100%;
-                height: 100%;
-                z-index: 1;
+        @@media (max-width: 768px) {
+            .seccion-puntos-acopio {
+                padding: 2.5rem 1rem;
             }
-
-            .aviso-sin-puntos {
-                text-align: center;
-                padding: 2rem 1rem;
-                color: #78909c;
-            }
+        }
     </style>
 </head>
 <body>
 
     @* --------------------- BARRA DE NAVEGACION --------------------- *@
-    <header class="barra-navegacion">
+    <header class="barra-navegacion" id="navbarPublica">
         <div class="icono-logo">🌱 Rooty</div>
+        <button type="button" class="btn-menu-movil" id="btnMenuPublico" aria-label="Abrir menú">☰</button>
         <nav class="enlaces-navegacion">
-            <a href="#que-es-rooty">¿Qué es Rooty?</a>
-            <a href="#como-funciona">¿Cómo Funciona?</a>
-            <a href="#puntos-acopio">Puntos de Acopio</a>
+            <a href="#que-es-rooty" onclick="cerrarMenuPublico()">¿Qué es Rooty?</a>
+            <a href="#como-funciona" onclick="cerrarMenuPublico()">¿Cómo Funciona?</a>
+            <a href="#puntos-acopio" onclick="cerrarMenuPublico()">Puntos de Acopio</a>
         </nav>
         <div class="botones-header">
             <a href="/Login" class="btn-login-nav">Iniciar Sesión</a>
@@ -211,7 +223,7 @@
                     </div>
 
                     @* Mapa *@
-                    <div class="mapa-publico-marco">
+                    <div class="mapa-publico-marco" id="marcoMapaPublico">
                         <div id="mapaPublicoRooty"></div>
                     </div>
 
@@ -226,67 +238,91 @@
         <p><small>Rooty - Plataforma de Reciclaje PET</small></p>
     </footer>
 
-    @* --------------------- LOGICA DEL MAPA PUBLICO --------------------- *@
+    @* --------------------- LOGICA DEL MAPA PUBLICO Y MENU MOVIL --------------------- *@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-            const puntosData = @Html.Raw(Model.PuntosJson);
-            const mapaEl = document.getElementById('mapaPublicoRooty');
-            const marcadores = [];
-            let mapa = null;
+        const navbarPublica = document.getElementById('navbarPublica');
+        const btnMenuPublico = document.getElementById('btnMenuPublico');
 
-            if (mapaEl && puntosData.length > 0) {
-                // Centro inicial del mapa (Monterrey, N.L.). Cambia las coordenadas si quieres otro punto de partida.
-                mapa = L.map('mapaPublicoRooty').setView([25.6950, -100.3100], 11);
+        if (btnMenuPublico && navbarPublica) {
+            btnMenuPublico.addEventListener('click', () => {
+                const abierto = navbarPublica.classList.toggle('menu-abierto');
+                btnMenuPublico.textContent = abierto ? '✕' : '☰';
+            });
+        }
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; OpenStreetMap | Rooty'
-                }).addTo(mapa);
+        function cerrarMenuPublico() {
+            if (navbarPublica && navbarPublica.classList.contains('menu-abierto')) {
+                navbarPublica.classList.remove('menu-abierto');
+                if (btnMenuPublico) btnMenuPublico.textContent = '☰';
+            }
+        }
 
-                const iconoRooty = L.divIcon({
-                    className: 'custom-pin-rooty',
-                    html: `<div class="pin-verde">🌱</div>`,
-                    iconSize: [36, 36],
-                    iconAnchor: [18, 36],
-                    popupAnchor: [0, -34]
-                });
+        const puntosData = @Html.Raw(Model.PuntosJson);
+        const mapaEl = document.getElementById('mapaPublicoRooty');
+        const marcadores = [];
+        let mapa = null;
 
-                puntosData.forEach((punto, idx) => {
-                    const marker = L.marker([punto.Latitud, punto.Longitud], { icon: iconoRooty }).addTo(mapa);
+        if (mapaEl && puntosData.length > 0) {
+            // Centro inicial del mapa (Monterrey, N.L.). Cambia las coordenadas si quieres otro punto de partida.
+            mapa = L.map('mapaPublicoRooty').setView([25.6950, -100.3100], 11);
 
-                    marker.bindPopup(`
-                                <div class="popup-rooty">
-                                    <strong>${punto.NombrePunto}</strong>
-                                    <p>${punto.UbicacionDetalle}</p>
-                                </div>
-                            `);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap | Rooty'
+            }).addTo(mapa);
 
-                    // Al tocar un marcador se resalta su tarjeta en la lista
-                    marker.on('click', () => resaltarTarjeta(idx));
-                    marcadores.push(marker);
-                });
+            setTimeout(() => mapa.invalidateSize(), 250);
+
+            const iconoRooty = L.divIcon({
+                className: 'custom-pin-rooty',
+                html: `<div class="pin-verde">🌱</div>`,
+                iconSize: [36, 36],
+                iconAnchor: [18, 36],
+                popupAnchor: [0, -34]
+            });
+
+            puntosData.forEach((punto, idx) => {
+                const marker = L.marker([punto.Latitud, punto.Longitud], { icon: iconoRooty }).addTo(mapa);
+
+                marker.bindPopup(`
+                    <div class="popup-rooty">
+                        <strong>${punto.NombrePunto}</strong>
+                        <p>${punto.UbicacionDetalle}</p>
+                    </div>
+                `);
+
+                // Al tocar un marcador se resalta su tarjeta en la lista
+                marker.on('click', () => resaltarTarjeta(idx));
+                marcadores.push(marker);
+            });
+        }
+
+        // --------------------- RESALTAR TARJETA EN LA LISTA ---------------------
+        function resaltarTarjeta(indice) {
+            document.querySelectorAll('.tarjeta-punto-item').forEach(el => el.classList.remove('seleccionado'));
+            const tarjeta = document.getElementById('card-punto-' + indice);
+            if (tarjeta) {
+                tarjeta.classList.add('seleccionado');
+                tarjeta.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // --------------------- UBICAR UN CENTRO EN EL MAPA DESDE LA LISTA ---------------------
+        function verPuntoEnMapa(indice) {
+            const punto = puntosData[indice];
+            const marker = marcadores[indice];
+            if (!mapa || !punto || !marker) return;
+
+            if (window.innerWidth <= 900) {
+                const marco = document.getElementById('marcoMapaPublico');
+                if (marco) marco.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
-            // --------------------- RESALTAR TARJETA EN LA LISTA ---------------------
-            function resaltarTarjeta(indice) {
-                document.querySelectorAll('.tarjeta-punto-item').forEach(el => el.classList.remove('seleccionado'));
-                const tarjeta = document.getElementById('card-punto-' + indice);
-                if (tarjeta) {
-                    tarjeta.classList.add('seleccionado');
-                    tarjeta.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            }
-
-            // --------------------- UBICAR UN CENTRO EN EL MAPA DESDE LA LISTA ---------------------
-            function verPuntoEnMapa(indice) {
-                const punto = puntosData[indice];
-                const marker = marcadores[indice];
-                if (!mapa || !punto || !marker) return;
-
-                mapa.flyTo([punto.Latitud, punto.Longitud], 15, { duration: 1.0 });
-                marker.openPopup();
-                resaltarTarjeta(indice);
-            }
+            mapa.flyTo([punto.Latitud, punto.Longitud], 15, { duration: 1.0 });
+            marker.openPopup();
+            resaltarTarjeta(indice);
+        }
     </script>
 
 </body>
