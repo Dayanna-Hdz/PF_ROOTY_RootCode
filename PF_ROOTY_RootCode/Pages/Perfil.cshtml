@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model PF_ROOTY_RootCode.Pages.PerfilModel
 @{
     ViewData["Title"] = "Mi Perfil - Rooty";
@@ -18,106 +18,123 @@
 
     @* --------------------- ESTILOS DE LAS TABLAS DE HISTORIAL --------------------- *@
     <style>
-            .grid-historiales {
-                display: grid;
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-                margin-top: 2rem;
-            }
+        .grid-historiales {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
 
-            .panel-historial {
-                background: var(--color-tarjeta);
-                border: 1px solid #e0e6e3;
-                border-radius: 16px;
-                padding: 1.5rem 1.8rem;
-                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-            }
+        .panel-historial {
+            background: var(--color-tarjeta);
+            border: 1px solid #e0e6e3;
+            border-radius: 16px;
+            padding: 1.5rem 1.8rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
 
-            .header-historial {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-                margin-bottom: 1rem;
-            }
+        .header-historial {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
 
-                .header-historial h2 {
-                    margin: 0;
-                    color: var(--color-primario-oscuro);
-                    font-size: 1.25rem;
-                }
-
-                .header-historial span {
-                    font-size: 0.82rem;
-                    color: #78909c;
-                }
-
-            .tabla-scroll {
-                overflow-x: auto;
-            }
-
-            .tabla-historial {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 0.9rem;
-            }
-
-                .tabla-historial th {
-                    text-align: left;
-                    padding: 0.7rem 0.8rem;
-                    font-size: 0.75rem;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    color: #64748b;
-                    border-bottom: 2px solid #e8f5e9;
-                    white-space: nowrap;
-                }
-
-                .tabla-historial td {
-                    padding: 0.8rem;
-                    border-bottom: 1px solid #eef2f0;
-                    color: #2c3e50;
-                }
-
-                .tabla-historial tbody tr:hover {
-                    background-color: #f8fbf9;
-                }
-
-            .celda-puntos {
-                font-weight: 700;
-                color: var(--color-primario);
-                white-space: nowrap;
-            }
-
-                .celda-puntos.negativo {
-                    color: #c62828;
-                }
-
-            .celda-codigo {
-                font-family: Consolas, 'Courier New', monospace;
-                font-size: 0.82rem;
+            .header-historial h2 {
+                margin: 0;
                 color: var(--color-primario-oscuro);
-                white-space: nowrap;
+                font-size: 1.25rem;
             }
 
-            .historial-vacio {
-                text-align: center;
-                padding: 2rem 1rem;
+            .header-historial span {
+                font-size: 0.82rem;
                 color: #78909c;
             }
 
-                .historial-vacio a {
-                    color: var(--color-primario);
-                    font-weight: 600;
+        .tabla-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tabla-historial {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+            .tabla-historial th {
+                text-align: left;
+                padding: 0.7rem 0.8rem;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: #64748b;
+                border-bottom: 2px solid #e8f5e9;
+                white-space: nowrap;
+            }
+
+            .tabla-historial td {
+                padding: 0.8rem;
+                border-bottom: 1px solid #eef2f0;
+                color: #2c3e50;
+            }
+
+            .tabla-historial tbody tr:hover {
+                background-color: #f8fbf9;
+            }
+
+        .celda-puntos {
+            font-weight: 700;
+            color: var(--color-primario);
+            white-space: nowrap;
+        }
+
+            .celda-puntos.negativo {
+                color: #c62828;
+            }
+
+        .celda-codigo {
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 0.82rem;
+            color: var(--color-primario-oscuro);
+            white-space: nowrap;
+        }
+
+        .historial-vacio {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #78909c;
+        }
+
+            .historial-vacio a {
+                color: var(--color-primario);
+                font-weight: 600;
+            }
+
+        @@media (max-width: 768px) {
+            .panel-historial {
+                padding: 1.15rem 1rem;
+            }
+
+            .tabla-historial {
+                font-size: 0.82rem;
+            }
+
+                .tabla-historial th,
+                .tabla-historial td {
+                    padding: 0.6rem 0.55rem;
                 }
+        }
     </style>
 </head>
 <body class="app-body">
 
     @* --------------------- BARRA DE NAVEGACION INTERNA --------------------- *@
-    <header class="navbar-interna">
+    <header class="navbar-interna" id="navbarInterna">
         <div class="logo-app">🌱 Rooty</div>
+        <button type="button" class="btn-menu-movil" id="btnMenuInterno" aria-label="Abrir menú">☰</button>
         <nav class="nav-links-interna">
             <a href="/MenuPrincipal">Menú Principal</a>
             <a href="/AgregarNuevoAporte">Agregar Aporte</a>
@@ -277,12 +294,21 @@
     <footer class="footer-minimalista"></footer>
 
     <script>
-            // Bloquea el botón Atrás del navegador tras cerrar sesión (BFCache)
-            window.addEventListener('pageshow', function (event) {
-                if (event.persisted) {
-                    window.location.reload();
-                }
+        const navbarInterna = document.getElementById('navbarInterna');
+        const btnMenuInterno = document.getElementById('btnMenuInterno');
+        if (btnMenuInterno && navbarInterna) {
+            btnMenuInterno.addEventListener('click', () => {
+                const abierto = navbarInterna.classList.toggle('menu-abierto');
+                btnMenuInterno.textContent = abierto ? '✕' : '☰';
             });
+        }
+
+        // Bloquea el botón Atrás del navegador tras cerrar sesión (BFCache)
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
     </script>
 
 </body>
